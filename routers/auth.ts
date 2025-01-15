@@ -1,24 +1,9 @@
-import express, { Request, Response } from "express";
-import { validateData } from "middleware/validation";
-import {
-  userRegistrationPayload,
-  userRegistrationSchema,
-} from "validation/schemas";
+import express from "express";
 
-const authRouter = express.Router();
+import { signIn } from "@controllers/auth";
+import { validateData } from "@middleware/validation";
+import { userRegistrationSchema } from "@validation/schemas";
 
-authRouter.post(
-  "/signup",
-  validateData(userRegistrationSchema),
-  (req: Request, res: Response) => {
-    const { email, password, confirmPassword } =
-      req.body as userRegistrationPayload;
-
-    res.status(201).json({
-      message: "User signed up successfully",
-      user: { id: Date.now(), email },
-    });
-  }
-);
-
-export default authRouter;
+export default express
+  .Router()
+  .post("/signup", validateData(userRegistrationSchema), signIn);

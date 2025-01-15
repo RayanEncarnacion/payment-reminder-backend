@@ -1,14 +1,12 @@
-import express, { Express, Response } from "express";
+import express from "express";
 import bodyParser from "body-parser";
-import authRouter from "routers/auth";
 
-const app: Express = express();
+import authRouter from "@routers/auth";
+
+const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
-
 app.use("/auth", authRouter);
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+app.listen(port, () => console.log(`Server listening on port ${port}`));
