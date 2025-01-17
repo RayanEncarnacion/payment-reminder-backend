@@ -29,6 +29,11 @@ class AuthController {
       res.status(200).json({
         success: true,
         message: "Logged in successfully!",
+        token: _authService.createAuthToken({
+          id: user.id,
+          username: user.username,
+          email,
+        }),
       });
       return;
     }
