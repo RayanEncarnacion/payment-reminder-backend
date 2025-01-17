@@ -15,4 +15,5 @@ export default express
     "/signin",
     _middleware.validateBody(userSignInSchema),
     _authController.signIn
-  );
+  )
+  .post("/logout", _authController.logout);

@@ -20,6 +20,14 @@ class AuthController {
     });
   }
 
+  async logout(req: Request, res: Response) {
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully!",
+      token: _authService.createExpiredToken(),
+    });
+  }
+
   async signIn(req: Request, res: Response) {
     const { email, password } = req.body as userRegistrationPayload;
 

@@ -30,6 +30,17 @@ class AuthService {
       throw new Error("There was an error creating the JWT");
     }
   }
+
+  createExpiredToken() {
+    try {
+      return jwt.sign({}, process.env.JWT_SECRET!, {
+        expiresIn: 0,
+      });
+    } catch (error) {
+      console.error(error);
+      throw new Error("There was an error deleting the auth token");
+    }
+  }
 }
 
 export default new AuthService();
