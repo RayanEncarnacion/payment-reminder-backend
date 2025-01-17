@@ -12,7 +12,6 @@ export function validateData(
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        console.log({ error });
         const errorsDictionary = error.errors.reduce(
           (acc: Record<string, any>, issue: ZodIssue) => {
             acc[issue.path[0]] = issue.message;
@@ -20,6 +19,7 @@ export function validateData(
           },
           {}
         );
+
         res
           .status(StatusCodes.BAD_REQUEST)
           .json({ error: "Invalid data", inputs: errorsDictionary });
