@@ -1,9 +1,7 @@
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/mysql2";
 import { usersTable } from "@db/schemas/client";
 import { eq } from "drizzle-orm";
-
-const db = drizzle(process.env.DATABASE_URL!);
+import { db } from "@db";
 
 class UserService {
   async createUser(user: typeof usersTable.$inferInsert) {
