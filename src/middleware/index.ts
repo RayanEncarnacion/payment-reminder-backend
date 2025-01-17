@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { z, ZodError, ZodIssue } from "zod";
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 
 class Middleware {
   validateBody(schema: z.ZodEffects<any, any> | z.ZodObject<any, any>) {
@@ -44,6 +44,10 @@ class Middleware {
       (req as any).authToken = decoded;
       next();
     } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        res.status(401).json({ message: "Token has expired" });
+        return;
+      }
       res.status(403).json({ message: "Invalid token" });
     }
   }
