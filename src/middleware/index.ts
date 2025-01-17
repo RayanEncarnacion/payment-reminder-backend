@@ -34,10 +34,13 @@ class Middleware {
   validateAuthToken(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization?.split(" ")[1];
 
-    if (!token) return res.status(401).json({ message: "Access denied" });
+    if (!token) {
+      res.status(401).json({ message: "Access denied" });
+      return;
+    }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      const decoded = jwt.verify(token!, process.env.JWT_SECRET!);
       (req as any).authToken = decoded;
       next();
     } catch (err) {
