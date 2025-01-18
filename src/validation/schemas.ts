@@ -12,9 +12,16 @@ export const userRegistrationSchema = z
     path: ["confirmPassword"],
   });
 
+export type userRegistrationPayload = z.infer<typeof userRegistrationSchema>;
+
 export const userSignInSchema = z.object({
   email: z.string().email().max(100),
   password: z.string().min(8).max(100),
 });
 
-export type userRegistrationPayload = z.infer<typeof userRegistrationSchema>;
+export const createClientSchema = z.object({
+  email: z.string().email().max(100),
+  name: z.string().max(100),
+});
+
+export type createClientPayload = z.infer<typeof createClientSchema>;
