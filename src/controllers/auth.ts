@@ -1,20 +1,19 @@
 import { Response, Request } from "express";
 import { userRegistrationPayload } from "@validation/schemas";
-import _userService from "@services/user";
-import _authService from "@services/auth";
+import { AuthService, UserService } from "@services";
 
 class AuthController {
   async signUp(req: Request, res: Response) {
     const { email, username, password } = req.body as userRegistrationPayload;
 
-    const user = await _userService.createUser({
+    const user = await UserService.createUser({
       email,
       username,
-      passwordHash: await _authService.hashPassword(password),
+      passwordHash: await AuthService.hashPassword(password),
       createdBy: 1,
     });
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       user,
     });
@@ -24,20 +23,20 @@ class AuthController {
     res.status(200).json({
       success: true,
       message: "Logged out successfully!",
-      token: _authService.createExpiredToken(),
+      token: AuthService.createExpiredToken(),
     });
   }
 
   async signIn(req: Request, res: Response) {
     const { email, password } = req.body as userRegistrationPayload;
 
-    const user = await _userService.getUserByEmail(email);
+    const user = await UserService.getUserByEmail(email);
 
-    if (await _authService.passwordsMatch(password, user.passwordHash)) {
-      res.status(200).json({
+    if (await AuthService.passwordsMatch(password, user.passwordHash)) {
+      res.status(201).json({
         success: true,
         message: "Logged in successfully!",
-        token: _authService.createAuthToken({
+        token: AuthService.createAuthToken({
           id: user.id,
           username: user.username,
           email,

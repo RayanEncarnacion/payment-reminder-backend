@@ -1,5 +1,5 @@
 import "dotenv/config";
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 class AuthService {

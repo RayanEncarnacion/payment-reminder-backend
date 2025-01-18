@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { usersTable } from "@db/schemas/client";
+import { usersTable } from "@db/schemas";
 import { eq } from "drizzle-orm";
 import { db } from "@db";
 

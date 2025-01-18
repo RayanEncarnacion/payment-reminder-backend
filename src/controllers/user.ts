@@ -1,10 +1,10 @@
 import { Response, Request } from "express";
-import _userService from "@services/user";
+import { UserService } from "@services";
 
 class UserController {
   async getAll(req: Request, res: Response) {
     try {
-      const users = await _userService.getUsers();
+      const users = await UserService.getUsers();
       res.status(200).json({ success: true, data: users });
     } catch (error: any) {
       res.status(500).json({
