@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/RayanEncarnacion/payment-reminder-backend#readme",
   "dependencies": {
+    "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.7",
