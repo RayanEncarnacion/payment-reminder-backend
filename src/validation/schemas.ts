@@ -24,8 +24,13 @@ export const createClientSchema = z.object({
   name: z.string().max(100),
 });
 
+export const updateClientSchema = createClientSchema.extend({
+  active: z.boolean(),
+});
+
 export const idParamSchema = z.object({
   id: z.string().regex(/^\d+$/, "ID must be a anumber"),
 });
 
 export type createClientPayload = z.infer<typeof createClientSchema>;
+export type updateClientPayload = z.infer<typeof updateClientSchema>;

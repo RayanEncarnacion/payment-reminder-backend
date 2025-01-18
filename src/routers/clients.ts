@@ -1,7 +1,11 @@
 import express from "express";
 import _middleware from "@middleware";
 import { ClientController } from "@controllers";
-import { createClientSchema, idParamSchema } from "@validation/schemas";
+import {
+  createClientSchema,
+  idParamSchema,
+  updateClientSchema,
+} from "@validation/schemas";
 
 export default express
   .Router()
@@ -11,6 +15,13 @@ export default express
     _middleware.validateAuthToken,
     _middleware.validateBody(createClientSchema),
     ClientController.createClient
+  )
+  .put(
+    "/:id",
+    _middleware.validateAuthToken,
+    _middleware.validateParams(idParamSchema),
+    _middleware.validateBody(updateClientSchema),
+    ClientController.updateClient
   )
   .delete(
     "/:id",

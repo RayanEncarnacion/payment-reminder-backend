@@ -36,6 +36,13 @@ class ClientController {
 
     res.status(204).send();
   }
+
+  async updateClient(req: Request, res: Response) {
+    const { id } = req.params;
+    await ClientService.updateClient(parseInt(id, 10), req.body);
+
+    res.status(200).json({ success: true });
+  }
 }
 
 export default new ClientController();
