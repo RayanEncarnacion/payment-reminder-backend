@@ -8,7 +8,7 @@ import {
 
 export const usersTable = mysqlTable("users", {
   id: serial("id").primaryKey(),
-  email: varchar({ length: 255 }).notNull().unique(),
+  email: varchar({ length: 100 }).notNull().unique(),
   username: varchar({ length: 100 }).notNull(),
   passwordHash: varchar({ length: 100 }).notNull(),
   createdAt: datetime().default(new Date()).notNull(),
@@ -17,8 +17,8 @@ export const usersTable = mysqlTable("users", {
 
 export const clientsTable = mysqlTable("clients", {
   id: serial().primaryKey(),
-  name: varchar({ length: 255 }).notNull(),
-  email: varchar({ length: 255 }).notNull().unique(),
+  name: varchar({ length: 100 }).notNull(),
+  email: varchar({ length: 100 }).notNull().unique(),
   createdAt: datetime().default(new Date()).notNull(),
   createdBy: int().notNull(),
 });
