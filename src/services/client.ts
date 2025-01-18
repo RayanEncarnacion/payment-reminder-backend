@@ -27,6 +27,13 @@ class ClientService {
       await db.select().from(clientsTable).where(eq(clientsTable.email, email))
     )[0];
   }
+
+  async deleteClient(id: number) {
+    await db
+      .update(clientsTable)
+      .set({ deleted: 1 })
+      .where(eq(clientsTable.id, id));
+  }
 }
 
 export default new ClientService();

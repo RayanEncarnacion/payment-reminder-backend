@@ -29,6 +29,13 @@ class ClientController {
       client,
     });
   }
+
+  async deleteClient(req: Request, res: Response) {
+    const { id } = req.params;
+    await ClientService.deleteClient(parseInt(id, 10));
+
+    res.status(204).send();
+  }
 }
 
 export default new ClientController();

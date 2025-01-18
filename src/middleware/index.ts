@@ -4,29 +4,24 @@ import { StatusCodes } from "http-status-codes";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 
 class Middleware {
+  validateParams(schema: z.ZodSchema<any>) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      try {
+        schema.parse(req.params);
+        next();
+      } catch (error: any) {
+        handleZodError(error, res);
+      }
+    };
+  }
+
   validateBody(schema: z.ZodEffects<any, any> | z.ZodObject<any, any>) {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
         schema.parse(req.body);
         next();
       } catch (error) {
-        if (error instanceof ZodError) {
-          const errorsDictionary = error.errors.reduce(
-            (acc: Record<string, any>, issue: ZodIssue) => {
-              acc[issue.path[0]] = issue.message;
-              return acc;
-            },
-            {}
-          );
-
-          res
-            .status(StatusCodes.BAD_REQUEST)
-            .json({ error: "Invalid data", inputs: errorsDictionary });
-        } else {
-          res
-            .status(StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ error: "Internal Server Error" });
-        }
+        handleZodError(error, res);
       }
     };
   }
@@ -54,3 +49,23 @@ class Middleware {
 }
 
 export default new Middleware();
+
+function handleZodError(error: any, res: Response) {
+  if (error instanceof ZodError) {
+    const errorsDictionary = error.errors.reduce(
+      (acc: Record<string, any>, issue: ZodIssue) => {
+        acc[issue.path[0]] = issue.message;
+        return acc;
+      },
+      {}
+    );
+
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ error: "Invalid data", inputs: errorsDictionary });
+  } else {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
+  }
+}
