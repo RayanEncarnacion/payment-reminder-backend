@@ -3,6 +3,7 @@ import {
   int,
   mysqlTable,
   serial,
+  tinyint,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -19,6 +20,8 @@ export const clientsTable = mysqlTable("clients", {
   id: serial().primaryKey(),
   name: varchar({ length: 100 }).notNull(),
   email: varchar({ length: 100 }).notNull().unique(),
+  active: tinyint().default(1).notNull(),
+  deleted: tinyint().default(0).notNull(),
   createdAt: datetime().default(new Date()).notNull(),
   createdBy: int().notNull(),
 });
