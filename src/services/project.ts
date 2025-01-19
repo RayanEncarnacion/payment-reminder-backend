@@ -22,6 +22,13 @@ class ProjectService {
         .limit(1)
     )[0];
   }
+
+  async delete(id: number) {
+    await db
+      .update(projectsTable)
+      .set({ deleted: 1 })
+      .where(eq(projectsTable.id, id));
+  }
 }
 
 export default new ProjectService();

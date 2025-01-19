@@ -58,6 +58,13 @@ class ProjectController {
       });
     }
   }
+
+  async delete(req: Request, res: Response) {
+    const { id } = req.params;
+    await ProjectService.delete(parseInt(id, 10));
+
+    res.status(204).send();
+  }
 }
 
 export default new ProjectController();
