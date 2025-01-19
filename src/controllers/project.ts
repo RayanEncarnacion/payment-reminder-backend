@@ -65,6 +65,13 @@ class ProjectController {
 
     res.status(204).send();
   }
+
+  async update(req: Request, res: Response) {
+    const { id } = req.params;
+    await ProjectService.update(parseInt(id, 10), req.body);
+
+    res.status(200).json({ success: true });
+  }
 }
 
 export default new ProjectController();

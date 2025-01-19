@@ -2,6 +2,7 @@ import "dotenv/config";
 import { projectsTable } from "@db/schemas";
 import { eq } from "drizzle-orm";
 import { db } from "@db";
+import { updateProjectPayload } from "@validation/schemas";
 
 class ProjectService {
   async getAll() {
@@ -27,6 +28,16 @@ class ProjectService {
     await db
       .update(projectsTable)
       .set({ deleted: 1 })
+      .where(eq(projectsTable.id, id));
+  }
+
+  async update(id: number, project: updateProjectPayload) {
+    await db
+      .update(projectsTable)
+      .set({
+        name: project.name,
+        active: +project.active,
+      })
       .where(eq(projectsTable.id, id));
   }
 }
