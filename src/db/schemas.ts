@@ -33,3 +33,8 @@ export const projectsTable = mysqlTable("projects", {
   createdAt: datetime().default(new Date()),
   createdBy: int().references(() => usersTable.id),
 });
+
+export type DBTables =
+  | typeof usersTable
+  | typeof clientsTable
+  | typeof projectsTable;
