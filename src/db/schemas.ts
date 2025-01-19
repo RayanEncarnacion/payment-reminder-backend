@@ -2,26 +2,27 @@ import {
   datetime,
   int,
   mysqlTable,
-  serial,
   tinyint,
   varchar,
 } from "drizzle-orm/mysql-core";
 
 export const usersTable = mysqlTable("users", {
-  id: serial("id").primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   email: varchar({ length: 100 }).notNull().unique(),
   username: varchar({ length: 100 }).notNull(),
   passwordHash: varchar({ length: 100 }).notNull(),
-  createdAt: datetime().default(new Date()).notNull(),
-  createdBy: int().notNull(),
+  createdAt: datetime().default(new Date()),
 });
 
 export const clientsTable = mysqlTable("clients", {
-  id: serial().primaryKey(),
-  name: varchar({ length: 100 }).notNull(),
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar({ length: 100 }).notNull().unique(),
   email: varchar({ length: 100 }).notNull().unique(),
   active: tinyint().default(1).notNull(),
   deleted: tinyint().default(0).notNull(),
+  createdAt: datetime().default(new Date()),
+  createdBy: int().references(() => usersTable.id),
+});
 
 export const projectsTable = mysqlTable("projects", {
   id: int("id").primaryKey().autoincrement(),
