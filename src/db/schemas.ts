@@ -22,6 +22,13 @@ export const clientsTable = mysqlTable("clients", {
   email: varchar({ length: 100 }).notNull().unique(),
   active: tinyint().default(1).notNull(),
   deleted: tinyint().default(0).notNull(),
-  createdAt: datetime().default(new Date()).notNull(),
-  createdBy: int().notNull(),
+
+export const projectsTable = mysqlTable("projects", {
+  id: int("id").primaryKey().autoincrement(),
+  name: varchar({ length: 100 }).notNull().unique(),
+  clientId: int("clientId").references(() => clientsTable.id),
+  active: tinyint().default(1).notNull(),
+  deleted: tinyint().default(0).notNull(),
+  createdAt: datetime().default(new Date()),
+  createdBy: int().references(() => usersTable.id),
 });
