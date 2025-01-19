@@ -14,19 +14,20 @@ export default express
     "/",
     _middleware.validateAuthToken,
     _middleware.validateBody(createClientSchema),
-    ClientController.createClient
+    ClientController.create
   )
   .put(
     "/:id",
     _middleware.validateAuthToken,
     _middleware.validateParams(idParamSchema),
     _middleware.validateBody(updateClientSchema),
-    ClientController.updateClient
+    ClientController.update
   )
   .delete(
     "/:id",
     _middleware.validateAuthToken,
     _middleware.validateParams(idParamSchema),
+    ClientController.delete
   )
   .get(
     "/:id/projects",

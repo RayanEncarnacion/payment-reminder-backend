@@ -1,15 +1,16 @@
 import "dotenv/config";
-import { clientsTable } from "@db/schemas";
+import { clientsTable, projectsTable } from "@db/schemas";
 import { eq } from "drizzle-orm";
 import { db } from "@db";
 import { updateClientPayload } from "@validation/schemas";
 
 class ClientService {
-  async createClient(client: typeof clientsTable.$inferInsert) {
+  async create(client: typeof clientsTable.$inferInsert) {
     const [{ id }] = await db
       .insert(clientsTable)
       .values(client)
       .$returningId();
+
     return (
       await db
         .select()
@@ -19,24 +20,24 @@ class ClientService {
     )[0];
   }
 
-  async getClients() {
+  async getAll() {
     return await db.select().from(clientsTable);
   }
 
-  async getClientByEmail(email: string) {
+  async getByEmail(email: string) {
     return (
       await db.select().from(clientsTable).where(eq(clientsTable.email, email))
     )[0];
   }
 
-  async deleteClient(id: number) {
+  async delete(id: number) {
     await db
       .update(clientsTable)
       .set({ deleted: 1 })
       .where(eq(clientsTable.id, id));
   }
 
-  async updateClient(id: number, client: updateClientPayload) {
+  async update(id: number, client: updateClientPayload) {
     await db
       .update(clientsTable)
       .set({

@@ -5,7 +5,7 @@ import { ClientService } from "@services";
 class ClientController {
   async getAll(req: Request, res: Response) {
     try {
-      const clients = await ClientService.getClients();
+      const clients = await ClientService.getAll();
       res.status(200).json({ success: true, data: clients });
     } catch (error: any) {
       res.status(500).json({
@@ -15,10 +15,10 @@ class ClientController {
     }
   }
 
-  async createClient(req: Request, res: Response) {
+  async create(req: Request, res: Response) {
     const { email, name } = req.body as createClientPayload;
 
-    const client = await ClientService.createClient({
+    const client = await ClientService.create({
       email,
       name,
       createdBy: 1, // TODO: Get id of user from token
@@ -30,16 +30,16 @@ class ClientController {
     });
   }
 
-  async deleteClient(req: Request, res: Response) {
+  async delete(req: Request, res: Response) {
     const { id } = req.params;
-    await ClientService.deleteClient(parseInt(id, 10));
+    await ClientService.delete(parseInt(id, 10));
 
     res.status(204).send();
   }
 
-  async updateClient(req: Request, res: Response) {
+  async update(req: Request, res: Response) {
     const { id } = req.params;
-    await ClientService.updateClient(parseInt(id, 10), req.body);
+    await ClientService.update(parseInt(id, 10), req.body);
 
     res.status(200).json({ success: true });
   }
