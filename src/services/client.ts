@@ -46,6 +46,13 @@ class ClientService {
       })
       .where(eq(clientsTable.id, id));
   }
+
+  async getProjectsById(id: number) {
+    return await db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.clientId, id));
+  }
 }
 
 export default new ClientService();

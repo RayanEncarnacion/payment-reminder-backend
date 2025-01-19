@@ -27,5 +27,10 @@ export default express
     "/:id",
     _middleware.validateAuthToken,
     _middleware.validateParams(idParamSchema),
-    ClientController.deleteClient
+  )
+  .get(
+    "/:id/projects",
+    _middleware.validateAuthToken,
+    _middleware.validateParams(idParamSchema),
+    ClientController.getProjectsById
   );

@@ -43,6 +43,13 @@ class ClientController {
 
     res.status(200).json({ success: true });
   }
+
+  async getProjectsById(req: Request, res: Response) {
+    const { id } = req.params;
+    const projects = await ClientService.getProjectsById(parseInt(id, 10));
+
+    res.status(200).json({ success: true, projects });
+  }
 }
 
 export default new ClientController();
