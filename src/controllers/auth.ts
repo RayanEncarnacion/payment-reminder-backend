@@ -10,7 +10,6 @@ class AuthController {
       email,
       username,
       passwordHash: await AuthService.hashPassword(password),
-      createdBy: 1,
     });
 
     res.status(201).json({
