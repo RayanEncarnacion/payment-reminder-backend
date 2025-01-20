@@ -6,7 +6,7 @@ class AuthController {
   async signUp(req: Request, res: Response) {
     const { email, username, password } = req.body as userRegistrationPayload;
 
-    const user = await UserService.createUser({
+    const user = await UserService.create({
       email,
       username,
       passwordHash: await AuthService.hashPassword(password),
