@@ -29,10 +29,16 @@ class ClientService extends BaseService<typeof clientsTable> {
   }
 
   async delete(id: number) {
-    await db
-      .update(clientsTable)
-      .set({ deleted: 1 })
-      .where(eq(clientsTable.id, id));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(clientsTable)
+        .set({ deleted: 1 })
+        .where(eq(clientsTable.id, id));
+      await tx
+        .update(projectsTable)
+        .set({ deleted: 1 })
+        .where(eq(projectsTable.clientId, id));
+    });
   }
 
   async update(id: number, payload: updateClientPayload) {
