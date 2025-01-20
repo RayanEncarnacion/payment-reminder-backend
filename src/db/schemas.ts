@@ -1,5 +1,6 @@
 import {
   datetime,
+  decimal,
   int,
   mysqlTable,
   tinyint,
@@ -28,7 +29,8 @@ export const clientsTable = mysqlTable("clients", {
 export const projectsTable = mysqlTable("projects", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar({ length: 100 }).notNull().unique(),
-  clientId: int("clientId").references(() => clientsTable.id),
+  clientId: int().references(() => clientsTable.id),
+  price: decimal({ precision: 10, scale: 2 }).notNull(),
   active: tinyint().default(1).notNull(),
   deleted: tinyint().default(0).notNull(),
   createdAt: datetime().default(new Date()),
