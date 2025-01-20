@@ -1,5 +1,7 @@
 import express from "express";
+import cron from "node-cron";
 import { AuthRouter, ClientRouter, ProjectRouter, UserRouter } from "@routers";
+import { handleDailyCheck } from "@jobs/dailyCheck";
 
 const app = express();
 const port = 3000;
@@ -9,5 +11,7 @@ app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/client", ClientRouter);
 app.use("/project", ProjectRouter);
+
+cron.schedule("0 18 * * *", handleDailyCheck);
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
