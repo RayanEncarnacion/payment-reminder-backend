@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { clientsTable, projectsTable } from "@db/schemas";
-import { eq, or } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { db } from "@db";
 import { updateClientPayload } from "@validation/schemas";
 import { BaseService } from "./base";
@@ -43,7 +43,7 @@ class ClientService extends BaseService<typeof clientsTable> {
     return await db
       .select()
       .from(projectsTable)
-      .where(eq(projectsTable.clientId, id));
+      .where(and(eq(projectsTable.clientId, id), eq(projectsTable.deleted, 0)));
   }
 
   async getById(id: number) {
