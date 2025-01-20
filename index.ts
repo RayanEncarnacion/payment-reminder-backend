@@ -12,6 +12,6 @@ app.use("/user", UserRouter);
 app.use("/client", ClientRouter);
 app.use("/project", ProjectRouter);
 
-cron.schedule("0 18 * * *", handleDailyCheck);
+cron.schedule("0 0 * * *", handleDailyCheck);
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
