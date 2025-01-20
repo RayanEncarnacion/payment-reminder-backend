@@ -1,5 +1,4 @@
 import { Response, Request } from "express";
-import { createClientPayload } from "@validation/schemas";
 import { ClientService } from "@services";
 import { StatusCodes } from "http-status-codes";
 
@@ -58,19 +57,17 @@ class ClientController {
     const name = req.body.name.trim();
     const email = req.body.email.trim();
 
-    const clientWithNameOrEmail = await ClientService.getByNameOrEmail(
-      name,
-      email
-    );
+    const propsUsedByAnotherClient = (
+      await ClientService.getByNameOrEmail(name, email)
+    ).some((client) => client.id !== id);
 
-    if (clientWithNameOrEmail && clientWithNameOrEmail.id != id) {
+    if (propsUsedByAnotherClient) {
       res.status(StatusCodes.CONFLICT).json({
         success: false,
         error: "The name or email already exist.",
       });
       return;
     }
-
     await ClientService.update(id, req.body);
 
     res.status(200).json({ success: true });
