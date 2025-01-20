@@ -1,8 +1,7 @@
 import "dotenv/config";
 import { DBTables } from "@db/schemas";
-import { AnyTable, eq, Table } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "@db";
-import { clientsTable } from "@db/schemas";
 
 // TODO: Implement basic operations in base (getById, getAll, ect.)
 export class BaseService<T extends DBTables> {
@@ -17,12 +16,19 @@ export class BaseService<T extends DBTables> {
   }
 
   async getAll() {
-    return await db.select().from(this.#table);
+    return await db
+      .select()
+      .from(this.#table)
+      .where(eq(this.#table.deleted, 0));
   }
 
   async getById(id: number) {
     return (
-      await db.select().from(this.#table).where(eq(this.#table.id, id)).limit(1)
+      await db
+        .select()
+        .from(this.#table)
+        .where(and(eq(this.#table.id, id), eq(this.#table.deleted, 0)))
+        .limit(1)
     )[0];
   }
 
@@ -34,7 +40,10 @@ export class BaseService<T extends DBTables> {
   }
 
   async update(id: number, payload: any) {
-    await db.update(this.#table).set(payload).where(eq(this.#table.id, id));
+    await db
+      .update(this.#table)
+      .set(payload)
+      .where(and(eq(this.#table.id, id), eq(this.#table.deleted, 0)));
   }
 
   async create(payload: T["$inferInsert"]) {
