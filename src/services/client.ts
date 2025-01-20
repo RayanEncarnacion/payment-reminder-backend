@@ -1,26 +1,25 @@
 import "dotenv/config";
 import { clientsTable, projectsTable } from "@db/schemas";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { db } from "@db";
 import { updateClientPayload } from "@validation/schemas";
 import { BaseService } from "./base";
 
-class ClientService extends BaseService {
+class ClientService extends BaseService<typeof clientsTable> {
+  constructor() {
+    super(clientsTable);
+  }
+
   async existsById(id: number) {
-    return await super.existsById(id, clientsTable);
+    return await super.existsById(id);
   }
 
   async create(client: typeof clientsTable.$inferInsert) {
-    const [{ id }] = await db
-      .insert(clientsTable)
-      .values(client)
-      .$returningId();
-
-    return await this.getById(id);
+    return await super.create(client);
   }
 
   async getAll() {
-    return await db.select().from(clientsTable);
+    return await super.getAll();
   }
 
   async getByEmail(email: string) {
@@ -36,15 +35,8 @@ class ClientService extends BaseService {
       .where(eq(clientsTable.id, id));
   }
 
-  async update(id: number, client: updateClientPayload) {
-    await db
-      .update(clientsTable)
-      .set({
-        name: client.name,
-        email: client.email,
-        active: +client.active,
-      })
-      .where(eq(clientsTable.id, id));
+  async update(id: number, payload: updateClientPayload) {
+    await super.update(id, payload);
   }
 
   async getProjectsById(id: number) {
@@ -55,12 +47,15 @@ class ClientService extends BaseService {
   }
 
   async getById(id: number) {
+    return super.getById(id);
+  }
+
+  async getByNameOrEmail(name: string, email: string) {
     return (
       await db
         .select()
         .from(clientsTable)
-        .where(eq(clientsTable.id, id))
-        .limit(1)
+        .where(or(eq(clientsTable.email, email), eq(clientsTable.name, name)))
     )[0];
   }
 }

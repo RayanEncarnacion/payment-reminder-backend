@@ -3,32 +3,23 @@ import { projectsTable } from "@db/schemas";
 import { eq } from "drizzle-orm";
 import { db } from "@db";
 import { updateProjectPayload } from "@validation/schemas";
+import { BaseService } from "./base";
 
-class ProjectService {
+class ProjectService extends BaseService<typeof projectsTable> {
+  constructor() {
+    super(projectsTable);
+  }
+
   async getAll() {
-    return await db.select().from(projectsTable);
+    return await super.getAll();
   }
 
   async create(project: typeof projectsTable.$inferInsert) {
-    const [{ id }] = await db
-      .insert(projectsTable)
-      .values(project)
-      .$returningId();
-
-    return (
-      await db
-        .select()
-        .from(projectsTable)
-        .where(eq(projectsTable.id, id))
-        .limit(1)
-    )[0];
+    return await super.create(project);
   }
 
   async delete(id: number) {
-    await db
-      .update(projectsTable)
-      .set({ deleted: 1 })
-      .where(eq(projectsTable.id, id));
+    await super.delete(id);
   }
 
   async update(id: number, project: updateProjectPayload) {
@@ -39,6 +30,12 @@ class ProjectService {
         active: +project.active,
       })
       .where(eq(projectsTable.id, id));
+  }
+
+  async getByName(name: string) {
+    return (
+      await db.select().from(projectsTable).where(eq(projectsTable.name, name))
+    )[0];
   }
 }
 
