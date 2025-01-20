@@ -10,6 +10,7 @@ export const usersTable = mysqlTable("users", {
   id: int("id").primaryKey().autoincrement(),
   email: varchar({ length: 100 }).notNull().unique(),
   username: varchar({ length: 100 }).notNull(),
+  deleted: tinyint().default(0).notNull(),
   passwordHash: varchar({ length: 100 }).notNull(),
   createdAt: datetime().default(new Date()),
 });
