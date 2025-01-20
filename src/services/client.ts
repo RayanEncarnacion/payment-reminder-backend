@@ -51,12 +51,10 @@ class ClientService extends BaseService<typeof clientsTable> {
   }
 
   async getByNameOrEmail(name: string, email: string) {
-    return (
-      await db
-        .select()
-        .from(clientsTable)
-        .where(or(eq(clientsTable.email, email), eq(clientsTable.name, name)))
-    )[0];
+    return await db
+      .select()
+      .from(clientsTable)
+      .where(or(eq(clientsTable.email, email), eq(clientsTable.name, name)));
   }
 }
 
