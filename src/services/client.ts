@@ -6,10 +6,6 @@ import { updateClientPayload } from "@validation/schemas";
 import { BaseService } from "./base";
 
 class ClientService extends BaseService<typeof clientsTable> {
-  constructor() {
-    super(clientsTable);
-  }
-
   async existsById(id: number) {
     return await super.existsById(id);
   }
@@ -64,4 +60,4 @@ class ClientService extends BaseService<typeof clientsTable> {
   }
 }
 
-export default new ClientService();
+export default new ClientService(clientsTable);

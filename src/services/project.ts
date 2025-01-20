@@ -6,10 +6,6 @@ import { updateProjectPayload } from "@validation/schemas";
 import { BaseService } from "./base";
 
 class ProjectService extends BaseService<typeof projectsTable> {
-  constructor() {
-    super(projectsTable);
-  }
-
   async getAll() {
     return await super.getAll();
   }
@@ -39,4 +35,4 @@ class ProjectService extends BaseService<typeof projectsTable> {
   }
 }
 
-export default new ProjectService();
+export default new ProjectService(projectsTable);
