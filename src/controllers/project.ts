@@ -49,26 +49,42 @@ class ProjectController {
   }
 
   async delete(req: Request, res: Response) {
-    const { id } = req.params;
-    await ProjectService.delete(parseInt(id, 10));
+    try {
+      const { id } = req.params;
+      await ProjectService.delete(parseInt(id, 10));
 
-    res.status(204).send();
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: error?.message || "Something went wrong. Try again later.",
+      });
+    }
   }
 
   async update(req: Request, res: Response) {
-    const id = parseInt(req.params.id, 10);
-    const projectByName = await ProjectService.getByName(req.body.name.trim());
+    try {
+      const id = parseInt(req.params.id, 10);
+      const projectByName = await ProjectService.getByName(
+        req.body.name.trim()
+      );
 
-    if (projectByName && projectByName.id !== id) {
-      res.status(StatusCodes.CONFLICT).json({
+      if (projectByName && projectByName.id !== id) {
+        res.status(StatusCodes.CONFLICT).json({
+          success: false,
+          error: "The name already exist.",
+        });
+        return;
+      }
+      await ProjectService.update(id, req.body);
+
+      res.status(200).json({ success: true });
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: "The name already exist.",
+        error: error?.message || "Something went wrong. Try again later.",
       });
-      return;
     }
-    await ProjectService.update(id, req.body);
-
-    res.status(200).json({ success: true });
   }
 }
 

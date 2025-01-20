@@ -1,53 +1,75 @@
 import { Response, Request } from "express";
 import { userRegistrationPayload } from "@validation/schemas";
 import { AuthService, UserService } from "@services";
+import { StatusCodes } from "http-status-codes";
 
 class AuthController {
   async signUp(req: Request, res: Response) {
-    const { email, username, password } = req.body as userRegistrationPayload;
+    try {
+      const { email, username, password } = req.body as userRegistrationPayload;
 
-    const user = await UserService.create({
-      email,
-      username,
-      passwordHash: await AuthService.hashPassword(password),
-    });
+      const user = await UserService.create({
+        email,
+        username,
+        passwordHash: await AuthService.hashPassword(password),
+      });
 
-    res.status(201).json({
-      success: true,
-      user,
-    });
+      res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: error?.message || "Something went wrong. Try again later.",
+      });
+    }
   }
 
   async logout(req: Request, res: Response) {
-    res.status(200).json({
-      success: true,
-      message: "Logged out successfully!",
-      token: AuthService.createExpiredToken(),
-    });
+    try {
+      res.status(200).json({
+        success: true,
+        message: "Logged out successfully!",
+        token: AuthService.createExpiredToken(),
+      });
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: error?.message || "Something went wrong. Try again later.",
+      });
+    }
   }
 
   async signIn(req: Request, res: Response) {
-    const { email, password } = req.body as userRegistrationPayload;
+    try {
+      const { email, password } = req.body as userRegistrationPayload;
 
-    const user = await UserService.getUserByEmail(email);
+      const user = await UserService.getUserByEmail(email);
 
-    if (await AuthService.passwordsMatch(password, user.passwordHash)) {
-      res.status(201).json({
-        success: true,
-        message: "Logged in successfully!",
-        token: AuthService.createAuthToken({
-          id: user.id,
-          username: user.username,
-          email,
-        }),
+      if (await AuthService.passwordsMatch(password, user.passwordHash)) {
+        res.status(201).json({
+          success: true,
+          message: "Logged in successfully!",
+          token: AuthService.createAuthToken({
+            id: user.id,
+            username: user.username,
+            email,
+          }),
+        });
+        return;
+      }
+
+      res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
-      return;
+    } catch (error: any) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: error?.message || "Something went wrong. Try again later.",
+      });
     }
-
-    res.status(401).json({
-      success: false,
-      message: "Invalid credentials",
-    });
   }
 }
 
