@@ -1,4 +1,5 @@
 import {
+  date,
   datetime,
   decimal,
   int,
@@ -30,11 +31,30 @@ export const projectsTable = mysqlTable("projects", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar({ length: 100 }).notNull().unique(),
   clientId: int().references(() => clientsTable.id),
-  price: decimal({ precision: 10, scale: 2 }).notNull(),
+  amount: decimal({ precision: 10, scale: 2 }).notNull(),
   active: tinyint().default(1).notNull(),
   deleted: tinyint().default(0).notNull(),
   createdAt: datetime().default(new Date()),
   createdBy: int().references(() => usersTable.id),
+});
+
+export const projectDatesTable = mysqlTable("projectDates", {
+  id: int("id").primaryKey().autoincrement(),
+  projectId: int().references(() => projectsTable.id),
+  day: tinyint().notNull(),
+  deleted: tinyint().default(0).notNull(),
+  createdAt: datetime().default(new Date()),
+  createdBy: int().references(() => usersTable.id),
+});
+
+export const paymentsTable = mysqlTable("payments", {
+  id: int("id").primaryKey().autoincrement(),
+  projectId: int().references(() => projectsTable.id),
+  dueDate: date().notNull(),
+  amount: decimal({ precision: 10, scale: 2 }).notNull(),
+  payed: tinyint().default(0).notNull(),
+  deleted: tinyint().default(0).notNull(),
+  createdAt: datetime().default(new Date()),
 });
 
 export type DBTables =
