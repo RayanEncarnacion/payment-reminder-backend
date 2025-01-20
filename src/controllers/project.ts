@@ -19,7 +19,7 @@ class ProjectController {
 
   async create(req: Request, res: Response) {
     try {
-      const { name, clientId, price } = req.body as createProjectPayload;
+      const { name, clientId, amount } = req.body as createProjectPayload;
 
       if (!(await ClientService.existsById(clientId))) {
         res.status(StatusCodes.NOT_FOUND).json({
@@ -33,7 +33,7 @@ class ProjectController {
       const project = await ProjectService.create({
         name,
         clientId,
-        price: price.toFixed(2),
+        amount: amount.toFixed(2),
         createdBy: token.id,
       });
 

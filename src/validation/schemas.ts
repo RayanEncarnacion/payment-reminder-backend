@@ -27,7 +27,7 @@ export const createClientSchema = z.object({
 export const createProjectSchema = z.object({
   name: z.string().max(100),
   clientId: z.number().nonnegative().min(1),
-  price: z.number().refine((val) => val.toFixed(2) === `${val}`, {
+  amount: z.number().refine((val) => val.toFixed(2) === `${val}`, {
     message: "Must have up to 2 decimal places",
   }),
 });
