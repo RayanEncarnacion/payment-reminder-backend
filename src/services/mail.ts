@@ -10,7 +10,6 @@ const transporter = nodemailer.createTransport({
 });
 
 type ReminderOptions = {
-  to: string;
   project: string;
   client: string;
   amount: string;
@@ -21,8 +20,8 @@ class MailService {
   async send(options: ReminderOptions) {
     transporter.sendMail(
       {
-        to: options.to,
-        from: process.env.EMAIL!,
+        to: process.env.EMAIL_RECEIVER!,
+        from: process.env.EMAIL_SENDER!,
         subject: "Reminder of payment of project: " + options.project,
         html: getHtmlTemplate(options),
       },
@@ -170,24 +169,6 @@ function getHtmlTemplate({
                                                 <li><p><strong>Payment Due Date:</strong> ${dueDate}</p></li>
                                               </ul>
                                             </p>
-                                        </td>
-                                    </tr>
-                                        <td class="signature">
-                                            <p>
-                                                Hi, <br />
-                                                <b>Integrated system of Payment Reminder</b>
-                                            </p>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="footer">
-                                            &copy;2025 Payment Reminder
-                                            <br />
-                                            xxxx, xxxx
-                                            <br />
-                                            xxx-xxx-xxxx
-                                            <br />
-                                            info@paymentreminder.com
                                         </td>
                                     </tr>
                                 </table>
