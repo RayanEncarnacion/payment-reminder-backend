@@ -30,12 +30,15 @@ export const createProjectSchema = z.object({
 });
 
 export const updateClientSchema = createClientSchema.extend({
-  active: z.boolean(),
+  active: z.number().min(0).max(1).nonnegative(),
 });
 
-export const updateProjectSchema = createProjectSchema.extend({
-  active: z.boolean(),
-});
+export const updateProjectSchema = createProjectSchema
+  .extend({
+    name: z.string().max(100),
+    active: z.number().min(0).max(1).nonnegative(),
+  })
+  .omit({ clientId: true });
 
 export const idParamSchema = z.object({
   id: z.string().regex(/^\d+$/, "ID must be a anumber"),
