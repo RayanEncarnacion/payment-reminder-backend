@@ -1,14 +1,14 @@
-import { ProjectService } from "@services";
+import { ProjectService } from '@services'
 
 export async function handleDailyCheck() {
-  console.log("Running cron job!");
+  console.log('Running cron job!')
 
   try {
     Promise.allSettled([
       ProjectService.generatePayments(),
       ProjectService.sendOverduePaymentsEmails(),
-    ]);
+    ])
   } catch (error: any) {
-    console.error(error);
+    console.error(error)
   }
 }

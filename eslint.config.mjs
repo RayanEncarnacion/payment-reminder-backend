@@ -15,6 +15,7 @@ export default [
       sourceType: 'module',
       globals: {
         console: 'readonly',
+        process: 'readonly',
       },
     },
 
@@ -26,14 +27,6 @@ export default [
     rules: {
       ...typescriptPlugin.configs.recommended.rules,
       ...prettierConfig.rules,
-      'prettier/prettier': 'error',
-    },
-    settings: {
-      'import/resolver': {
-        typescript: {},
-      },
-    },
-    rules: {
       'prettier/prettier': 'error',
       'no-unused-vars': 'warn',
       eqeqeq: 'error',
@@ -67,6 +60,11 @@ export default [
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/ban-ts-comment': 'off',
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {},
+      },
     },
   },
 ]

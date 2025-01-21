@@ -1,25 +1,22 @@
-import "dotenv/config";
-import { DBTables } from "@db/schemas";
-import { eq, and } from "drizzle-orm";
-import { db } from "@db";
+import 'dotenv/config'
+import { eq, and } from 'drizzle-orm'
+import { db } from '@db'
+import { DBTables } from '@db/schemas'
 
 // TODO: Implement basic operations in base (getById, getAll, ect.)
 export class BaseService<T extends DBTables> {
-  #table;
+  #table
 
   constructor(table: DBTables) {
-    this.#table = table;
+    this.#table = table
   }
 
   async existsById(id: number) {
-    return !!(await this.getById(id));
+    return !!(await this.getById(id))
   }
 
   async getAll() {
-    return await db
-      .select()
-      .from(this.#table)
-      .where(eq(this.#table.deleted, 0));
+    return await db.select().from(this.#table).where(eq(this.#table.deleted, 0))
   }
 
   async getById(id: number) {
@@ -29,29 +26,29 @@ export class BaseService<T extends DBTables> {
         .from(this.#table)
         .where(and(eq(this.#table.id, id), eq(this.#table.deleted, 0)))
         .limit(1)
-    )[0];
+    )[0]
   }
 
   async delete(id: number) {
     await db
       .update(this.#table)
       .set({ deleted: 1 })
-      .where(eq(this.#table.id, id));
+      .where(eq(this.#table.id, id))
   }
 
   async update(id: number, payload: any) {
     await db
       .update(this.#table)
       .set(payload)
-      .where(and(eq(this.#table.id, id), eq(this.#table.deleted, 0)));
+      .where(and(eq(this.#table.id, id), eq(this.#table.deleted, 0)))
   }
 
-  async create(payload: T["$inferInsert"]) {
+  async create(payload: T['$inferInsert']) {
     const [{ id }] = (await db
       .insert(this.#table)
       .values(payload)
-      .$returningId()) as any;
+      .$returningId()) as any
 
-    return await this.getById(id);
+    return await this.getById(id)
   }
 }

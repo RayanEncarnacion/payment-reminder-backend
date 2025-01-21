@@ -1,28 +1,28 @@
-import "dotenv/config";
+import 'dotenv/config'
+import { eq, and, lt } from 'drizzle-orm'
+import { db } from '@db'
 import {
   clientsTable,
   paymentsTable,
   projectDatesTable,
   projectsTable,
-} from "@db/schemas";
-import MailService from "@services/mail";
-import { eq, and, lt } from "drizzle-orm";
-import { db } from "@db";
-import { updateProjectPayload } from "@validation/schemas";
-import { BaseService } from "./base";
-import { correctUTCDate } from "@utils";
+} from '@db/schemas'
+import MailService from '@services/mail'
+import { correctUTCDate } from '@utils'
+import { updateProjectPayload } from '@validation/schemas'
+import { BaseService } from './base'
 
 class ProjectService extends BaseService<typeof projectsTable> {
   async getAll() {
-    return await super.getAll();
+    return await super.getAll()
   }
 
   async create(project: typeof projectsTable.$inferInsert) {
-    return await super.create(project);
+    return await super.create(project)
   }
 
   async delete(id: number) {
-    await super.delete(id);
+    await super.delete(id)
   }
 
   async update(id: number, project: updateProjectPayload) {
@@ -32,13 +32,13 @@ class ProjectService extends BaseService<typeof projectsTable> {
         name: project.name,
         active: +project.active,
       })
-      .where(eq(projectsTable.id, id));
+      .where(eq(projectsTable.id, id))
   }
 
   async getByName(name: string) {
     return (
       await db.select().from(projectsTable).where(eq(projectsTable.name, name))
-    )[0];
+    )[0]
   }
 
   async generatePayments() {
@@ -51,18 +51,18 @@ class ProjectService extends BaseService<typeof projectsTable> {
       .from(projectsTable)
       .innerJoin(
         projectDatesTable,
-        eq(projectsTable.id, projectDatesTable.projectId)
+        eq(projectsTable.id, projectDatesTable.projectId),
       )
       .where(
         and(
           eq(projectDatesTable.day, new Date().getDate() + 5),
-          eq(projectsTable.deleted, 0)
-        )
-      );
+          eq(projectsTable.deleted, 0),
+        ),
+      )
 
     await db.transaction(async (tx) => {
       projectsToGeneratePayment.forEach(async ({ id, amount, day }) => {
-        const dueDate = getDueDate(day);
+        const dueDate = getDueDate(day)
         const alreadyHasPayment = (
           await tx
             .select()
@@ -70,22 +70,22 @@ class ProjectService extends BaseService<typeof projectsTable> {
             .where(
               and(
                 eq(paymentsTable.projectId, id),
-                eq(paymentsTable.dueDate, dueDate)
-              )
+                eq(paymentsTable.dueDate, dueDate),
+              ),
             )
-        )[0];
+        )[0]
 
-        if (alreadyHasPayment) return;
+        if (alreadyHasPayment) return
 
         await tx.insert(paymentsTable).values({
           amount,
           dueDate,
           projectId: id,
-        });
+        })
 
-        console.log("Payment generated!");
-      });
-    });
+        console.log('Payment generated!')
+      })
+    })
   }
 
   async sendOverduePaymentsEmails() {
@@ -104,24 +104,24 @@ class ProjectService extends BaseService<typeof projectsTable> {
         and(
           lt(paymentsTable.dueDate, new Date()),
           eq(paymentsTable.payed, 0),
-          eq(projectsTable.deleted, 0)
-        )
-      );
+          eq(projectsTable.deleted, 0),
+        ),
+      )
 
     overduePayments.forEach((row) => {
       MailService.send({
         ...row,
         dueDate: correctUTCDate(row.dueDate).toLocaleDateString(),
-      });
+      })
 
-      console.log("Reminder sent!");
-    });
+      console.log('Reminder sent!')
+    })
   }
 }
 
 function getDueDate(day: number) {
-  const currentDate = new Date();
-  return new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+  const currentDate = new Date()
+  return new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
 }
 
-export default new ProjectService(projectsTable);
+export default new ProjectService(projectsTable)

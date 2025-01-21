@@ -1,37 +1,37 @@
-import express from "express";
-import _middleware from "@middleware";
-import { ClientController } from "@controllers";
+import express from 'express'
+import { ClientController } from '@controllers'
+import _middleware from '@middleware'
 import {
   createClientSchema,
   idParamSchema,
   updateClientSchema,
-} from "@validation/schemas";
+} from '@validation/schemas'
 
 export default express
   .Router()
-  .get("/", ClientController.getAll)
+  .get('/', ClientController.getAll)
   .post(
-    "/",
+    '/',
     _middleware.validateAuthToken,
     _middleware.validateBody(createClientSchema),
-    ClientController.create
+    ClientController.create,
   )
   .put(
-    "/:id",
+    '/:id',
     _middleware.validateAuthToken,
     _middleware.validateParams(idParamSchema),
     _middleware.validateBody(updateClientSchema),
-    ClientController.update
+    ClientController.update,
   )
   .delete(
-    "/:id",
+    '/:id',
     _middleware.validateAuthToken,
     _middleware.validateParams(idParamSchema),
-    ClientController.delete
+    ClientController.delete,
   )
   .get(
-    "/:id/projects",
+    '/:id/projects',
     _middleware.validateAuthToken,
     _middleware.validateParams(idParamSchema),
-    ClientController.getProjectsById
-  );
+    ClientController.getProjectsById,
+  )

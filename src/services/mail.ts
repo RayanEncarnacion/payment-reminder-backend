@@ -1,20 +1,20 @@
-import "dotenv/config";
-import nodemailer from "nodemailer";
+import 'dotenv/config'
+import nodemailer from 'nodemailer'
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_SENDER!,
     pass: process.env.EMAIL_PASSWORD!,
   },
-});
+})
 
 type ReminderOptions = {
-  project: string;
-  client: string;
-  amount: string;
-  dueDate: string;
-};
+  project: string
+  client: string
+  amount: string
+  dueDate: string
+}
 
 class MailService {
   async send(options: ReminderOptions) {
@@ -22,17 +22,17 @@ class MailService {
       {
         to: process.env.EMAIL_RECEIVER!,
         from: process.env.EMAIL_SENDER!,
-        subject: "Reminder of payment of project: " + options.project,
+        subject: 'Reminder of payment of project: ' + options.project,
         html: getHtmlTemplate(options),
       },
       (error, info) => {
         if (error) {
-          console.error("Error sending email:", error);
+          console.error('Error sending email:', error)
         } else {
-          console.log("Email sent:", info.response);
+          console.log('Email sent:', info.response)
         }
-      }
-    );
+      },
+    )
   }
 }
 
@@ -178,7 +178,7 @@ function getHtmlTemplate({
                 </div>
             </body>
             </html>
-      `;
+      `
 }
 
-export default new MailService();
+export default new MailService()

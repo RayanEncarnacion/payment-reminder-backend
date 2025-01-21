@@ -1,19 +1,19 @@
-import express from "express";
+import express from 'express'
 
-import _middleware from "@middleware";
-import { userRegistrationSchema, userSignInSchema } from "@validation/schemas";
-import { AuthController } from "@controllers";
+import { AuthController } from '@controllers'
+import _middleware from '@middleware'
+import { userRegistrationSchema, userSignInSchema } from '@validation/schemas'
 
 export default express
   .Router()
   .post(
-    "/signup",
+    '/signup',
     _middleware.validateBody(userRegistrationSchema),
-    AuthController.signUp
+    AuthController.signUp,
   )
   .post(
-    "/signin",
+    '/signin',
     _middleware.validateBody(userSignInSchema),
-    AuthController.signIn
+    AuthController.signIn,
   )
-  .post("/logout", AuthController.logout);
+  .post('/logout', AuthController.logout)
