@@ -56,10 +56,10 @@ export default [
       'import/named': 'error',
       'import/default': 'error',
       'import/namespace': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
     settings: {
       'import/resolver': {
