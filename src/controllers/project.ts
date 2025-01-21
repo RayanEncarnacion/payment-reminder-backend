@@ -7,7 +7,7 @@ class ProjectController {
   async getAll(req: Request, res: Response) {
     try {
       res
-        .status(200)
+        .status(StatusCodes.OK)
         .json({ success: true, data: await ProjectService.getAll() })
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -54,7 +54,7 @@ class ProjectController {
       const { id } = req.params
       await ProjectService.delete(parseInt(id, 10))
 
-      res.status(204).send()
+      res.status(StatusCodes.NO_CONTENT).send()
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
@@ -77,7 +77,7 @@ class ProjectController {
       }
       await ProjectService.update(id, req.body)
 
-      res.status(200).json({ success: true })
+      res.status(StatusCodes.OK).json({ success: true })
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,

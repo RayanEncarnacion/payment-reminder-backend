@@ -14,7 +14,7 @@ class AuthController {
         passwordHash: await AuthService.hashPassword(password),
       })
 
-      res.status(201).json({
+      res.status(StatusCodes.CREATED).json({
         success: true,
         user,
       })
@@ -28,7 +28,7 @@ class AuthController {
 
   async logout(req: Request, res: Response) {
     try {
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: 'Logged out successfully!',
         token: AuthService.createExpiredToken(),
@@ -48,7 +48,7 @@ class AuthController {
       const user = await UserService.getUserByEmail(email)
 
       if (await AuthService.passwordsMatch(password, user.passwordHash)) {
-        res.status(201).json({
+        res.status(StatusCodes.CREATED).json({
           success: true,
           message: 'Logged in successfully!',
           token: AuthService.createAuthToken({
@@ -60,7 +60,7 @@ class AuthController {
         return
       }
 
-      res.status(401).json({
+      res.status(StatusCodes.UNAUTHORIZED).json({
         success: false,
         message: 'Invalid credentials',
       })

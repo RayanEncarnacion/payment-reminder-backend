@@ -6,7 +6,7 @@ class UserController {
   async getAll(req: Request, res: Response) {
     try {
       res
-        .status(200)
+        .status(StatusCodes.OK)
         .json({ success: true, data: await UserService.getUsers() })
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -21,7 +21,7 @@ class UserController {
       const { id } = req.params
       await UserService.delete(parseInt(id, 10))
 
-      res.status(204).send()
+      res.status(StatusCodes.NO_CONTENT).send()
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,

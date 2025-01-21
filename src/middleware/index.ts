@@ -30,7 +30,7 @@ class Middleware {
     const token = req.headers.authorization?.split(' ')[1]
 
     if (!token) {
-      res.status(401).json({ message: 'Access denied' })
+      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Access denied' })
       return
     }
 
@@ -40,10 +40,12 @@ class Middleware {
       next()
     } catch (err) {
       if (err instanceof TokenExpiredError) {
-        res.status(401).json({ message: 'Token has expired' })
+        res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ message: 'Token has expired' })
         return
       }
-      res.status(403).json({ message: 'Invalid token' })
+      res.status(StatusCodes.FORBIDDEN).json({ message: 'Invalid token' })
     }
   }
 }

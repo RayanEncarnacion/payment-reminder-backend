@@ -6,7 +6,7 @@ class ClientController {
   async getAll(req: Request, res: Response) {
     try {
       res
-        .status(200)
+        .status(StatusCodes.OK)
         .json({ success: true, data: await ClientService.getAll() })
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -40,7 +40,7 @@ class ClientController {
         createdBy: token.id,
       })
 
-      res.status(201).json({
+      res.status(StatusCodes.CREATED).json({
         success: true,
         client,
       })
@@ -57,7 +57,7 @@ class ClientController {
       const { id } = req.params
       await ClientService.delete(parseInt(id, 10))
 
-      res.status(204).send()
+      res.status(StatusCodes.NO_CONTENT).send()
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
@@ -85,7 +85,7 @@ class ClientController {
       }
       await ClientService.update(id, req.body)
 
-      res.status(200).json({ success: true })
+      res.status(StatusCodes.OK).json({ success: true })
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
@@ -99,7 +99,7 @@ class ClientController {
       const { id } = req.params
       const projects = await ClientService.getProjectsById(parseInt(id, 10))
 
-      res.status(200).json({ success: true, projects })
+      res.status(StatusCodes.OK).json({ success: true, projects })
     } catch (error: any) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
