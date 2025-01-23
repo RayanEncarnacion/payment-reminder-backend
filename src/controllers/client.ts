@@ -1,5 +1,6 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
+import { logEndpointError } from '@logger/index'
 import { ClientService } from '@services'
 
 class ClientController {
@@ -9,6 +10,8 @@ class ClientController {
         .status(StatusCodes.OK)
         .json({ success: true, data: await ClientService.getAll() })
     } catch (error: any) {
+      logEndpointError(error?.message, req)
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -45,6 +48,8 @@ class ClientController {
         client,
       })
     } catch (error: any) {
+      logEndpointError(error?.message, req, { body: req.body })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -54,11 +59,12 @@ class ClientController {
 
   async delete(req: Request, res: Response) {
     try {
-      const { id } = req.params
-      await ClientService.delete(parseInt(id, 10))
+      await ClientService.delete(parseInt(req.params.id, 10))
 
       res.status(StatusCodes.NO_CONTENT).send()
     } catch (error: any) {
+      logEndpointError(error?.message, req, { params: req.params })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -87,6 +93,11 @@ class ClientController {
 
       res.status(StatusCodes.OK).json({ success: true })
     } catch (error: any) {
+      logEndpointError(error?.message, req, {
+        body: req.body,
+        params: req.params,
+      })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -96,11 +107,15 @@ class ClientController {
 
   async getProjectsById(req: Request, res: Response) {
     try {
-      const { id } = req.params
-      const projects = await ClientService.getProjectsById(parseInt(id, 10))
-
-      res.status(StatusCodes.OK).json({ success: true, projects })
+      res.status(StatusCodes.OK).json({
+        success: true,
+        projects: await ClientService.getProjectsById(
+          parseInt(req.params.id, 10),
+        ),
+      })
     } catch (error: any) {
+      logEndpointError(error?.message, req, { params: req.params })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',

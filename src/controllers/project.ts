@@ -1,5 +1,6 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
+import { logEndpointError } from '@logger/index'
 import { ClientService, ProjectService } from '@services'
 import { createProjectPayload } from '@validation/schemas'
 
@@ -10,6 +11,8 @@ class ProjectController {
         .status(StatusCodes.OK)
         .json({ success: true, data: await ProjectService.getAll() })
     } catch (error: any) {
+      logEndpointError(error?.message, req)
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -21,6 +24,7 @@ class ProjectController {
     try {
       const { name, clientId, amount } = req.body as createProjectPayload
 
+      // TODO: Move validation to "ProjectService.create" method
       if (!(await ClientService.existsById(clientId))) {
         res.status(StatusCodes.NOT_FOUND).json({
           success: false,
@@ -42,6 +46,8 @@ class ProjectController {
         project,
       })
     } catch (error: any) {
+      logEndpointError(error?.message, req, { body: req.body })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -51,11 +57,12 @@ class ProjectController {
 
   async delete(req: Request, res: Response) {
     try {
-      const { id } = req.params
-      await ProjectService.delete(parseInt(id, 10))
+      await ProjectService.delete(parseInt(req.params.id, 10))
 
       res.status(StatusCodes.NO_CONTENT).send()
     } catch (error: any) {
+      logEndpointError(error?.message, req, { params: req.params })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -66,6 +73,8 @@ class ProjectController {
   async update(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id, 10)
+
+      // TODO: Move validation to "ProjectService.update" method (72 - 80)
       const projectByName = await ProjectService.getByName(req.body.name.trim())
 
       if (projectByName && projectByName.id !== id) {
@@ -75,10 +84,13 @@ class ProjectController {
         })
         return
       }
+
       await ProjectService.update(id, req.body)
 
       res.status(StatusCodes.OK).json({ success: true })
     } catch (error: any) {
+      logEndpointError(error?.message, req, { params: req.params })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',

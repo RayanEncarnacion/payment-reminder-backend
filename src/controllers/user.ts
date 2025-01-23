@@ -1,5 +1,6 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
+import { logEndpointError } from '@logger/index'
 import { UserService } from '@services'
 
 class UserController {
@@ -9,6 +10,8 @@ class UserController {
         .status(StatusCodes.OK)
         .json({ success: true, data: await UserService.getUsers() })
     } catch (error: any) {
+      logEndpointError(error?.message, req)
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',
@@ -23,6 +26,8 @@ class UserController {
 
       res.status(StatusCodes.NO_CONTENT).send()
     } catch (error: any) {
+      logEndpointError(error?.message, req, { params: req.params })
+
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         error: error?.message || 'Something went wrong. Try again later.',

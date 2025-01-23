@@ -13,6 +13,7 @@ export const logger = createLogger({
       ),
     }),
     new transports.File({ filename: 'app.log' }),
+    new transports.File({ filename: 'endpoint_errors.log', level: 'error' }),
   ],
 })
 
@@ -32,3 +33,23 @@ export const useMorgan = () =>
       },
     },
   })
+
+type BaseErrorLoggingProps = {
+  url?: string
+  originalUrl?: string
+  method?: string
+  ip?: string
+}
+
+export function logEndpointError(
+  message: any,
+  props: BaseErrorLoggingProps,
+  meta?: Record<string, any>,
+) {
+  logger.error(message, {
+    url: props.originalUrl,
+    method: props.method,
+    ip: props.ip,
+    ...meta,
+  })
+}
