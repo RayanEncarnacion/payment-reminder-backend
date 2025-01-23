@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import jwt, { TokenExpiredError } from 'jsonwebtoken'
 import { z, ZodError, ZodIssue } from 'zod'
+import { APIResponse } from '@utils/classes'
 
 class Middleware {
   validateParams(schema: z.ZodSchema<any>) {
@@ -10,7 +11,7 @@ class Middleware {
         schema.parse(req.params)
         next()
       } catch (error: any) {
-        handleZodError(error, res)
+        handleError(error, res)
       }
     }
   }
@@ -21,7 +22,7 @@ class Middleware {
         schema.parse(req.body)
         next()
       } catch (error) {
-        handleZodError(error, res)
+        handleError(error, res)
       }
     }
   }
@@ -30,7 +31,9 @@ class Middleware {
     const token = req.headers.authorization?.split(' ')[1]
 
     if (!token) {
-      res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Access denied' })
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(new APIResponse(StatusCodes.UNAUTHORIZED, null, 'Access Denied'))
       return
     }
 
@@ -42,17 +45,25 @@ class Middleware {
       if (err instanceof TokenExpiredError) {
         res
           .status(StatusCodes.UNAUTHORIZED)
-          .json({ message: 'Token has expired' })
+          .json(
+            new APIResponse(
+              StatusCodes.UNAUTHORIZED,
+              null,
+              'Token has expired',
+            ),
+          )
         return
       }
-      res.status(StatusCodes.FORBIDDEN).json({ message: 'Invalid token' })
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json(new APIResponse(StatusCodes.FORBIDDEN, null, 'Invalid token'))
     }
   }
 }
 
 export default new Middleware()
 
-function handleZodError(error: any, res: Response) {
+function handleError(error: any, res: Response) {
   if (error instanceof ZodError) {
     const errorsDictionary = error.errors.reduce(
       (acc: Record<string, any>, issue: ZodIssue) => {
@@ -64,10 +75,18 @@ function handleZodError(error: any, res: Response) {
 
     res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ error: 'Invalid data', inputs: errorsDictionary })
+      .json(
+        new APIResponse(StatusCodes.BAD_REQUEST, { errors: errorsDictionary }),
+      )
   } else {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Internal Server Error' })
+      .json(
+        new APIResponse(
+          error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+          null,
+          error.message,
+        ),
+      )
   }
 }

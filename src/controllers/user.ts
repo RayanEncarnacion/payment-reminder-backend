@@ -2,20 +2,26 @@ import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { logEndpointError } from '@logger/index'
 import { UserService } from '@services'
+import { APIResponse } from '@utils/classes'
 
 class UserController {
   async getAll(req: Request, res: Response) {
     try {
       res
         .status(StatusCodes.OK)
-        .json({ success: true, data: await UserService.getUsers() })
+        .json(new APIResponse(StatusCodes.OK, await UserService.getUsers()))
     } catch (error: any) {
       logEndpointError(error?.message, req)
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 
@@ -28,10 +34,15 @@ class UserController {
     } catch (error: any) {
       logEndpointError(error?.message, req, { params: req.params })
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 }

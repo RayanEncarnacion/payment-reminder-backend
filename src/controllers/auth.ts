@@ -2,6 +2,7 @@ import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { logEndpointError } from '@logger/index'
 import { AuthService, UserService } from '@services'
+import { APIResponse } from '@utils/classes'
 import { userRegistrationPayload } from '@validation/schemas'
 
 class AuthController {
@@ -15,34 +16,43 @@ class AuthController {
         passwordHash: await AuthService.hashPassword(password),
       })
 
-      res.status(StatusCodes.CREATED).json({
-        success: true,
-        user,
-      })
+      res
+        .status(StatusCodes.CREATED)
+        .json(new APIResponse(StatusCodes.CREATED, user))
     } catch (error: any) {
       logEndpointError(error?.message, req, { body: req.body })
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 
   async logout(req: Request, res: Response) {
     try {
-      res.status(StatusCodes.OK).json({
-        success: true,
-        message: 'Logged out successfully!',
-        token: AuthService.createExpiredToken(),
-      })
+      res.status(StatusCodes.OK).json(
+        new APIResponse(StatusCodes.OK, {
+          token: AuthService.createExpiredToken(),
+        }),
+      )
     } catch (error: any) {
       logEndpointError(error?.message, req)
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 
@@ -57,29 +67,40 @@ class AuthController {
         !user ||
         (await AuthService.checkUserPassword(password, user.passwordHash))
       ) {
-        res.status(StatusCodes.CREATED).json({
-          success: true,
-          message: 'Logged in successfully!',
-          token: AuthService.createAuthToken({
-            id: user!.id,
-            username: user!.username,
-            email,
-          }),
+        const token = AuthService.createAuthToken({
+          id: user!.id,
+          username: user!.username,
+          email,
         })
+        res
+          .status(StatusCodes.CREATED)
+          .json(
+            new APIResponse(
+              StatusCodes.CREATED,
+              { token },
+              'Logged in successfully',
+            ),
+          )
         return
       }
 
-      res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: 'Invalid credentials',
-      })
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json(
+          new APIResponse(StatusCodes.BAD_REQUEST, null, 'Invalid credentials'),
+        )
     } catch (error: any) {
       logEndpointError(error?.message, req, { body: req.body })
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 }

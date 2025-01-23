@@ -2,6 +2,7 @@ import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { logEndpointError } from '@logger/index'
 import { ClientService, ProjectService } from '@services'
+import { APIResponse } from '@utils/classes'
 import { createProjectPayload } from '@validation/schemas'
 
 class ProjectController {
@@ -9,14 +10,19 @@ class ProjectController {
     try {
       res
         .status(StatusCodes.OK)
-        .json({ success: true, data: await ProjectService.getAll() })
+        .json(new APIResponse(StatusCodes.OK, await ProjectService.getAll()))
     } catch (error: any) {
       logEndpointError(error?.message, req)
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 
@@ -26,10 +32,15 @@ class ProjectController {
 
       // TODO: Move validation to "ProjectService.create" method
       if (!(await ClientService.existsById(clientId))) {
-        res.status(StatusCodes.NOT_FOUND).json({
-          success: false,
-          error: 'The client does not exist.',
-        })
+        res
+          .status(StatusCodes.NOT_FOUND)
+          .json(
+            new APIResponse(
+              StatusCodes.NOT_FOUND,
+              null,
+              'The client does not exist',
+            ),
+          )
         return
       }
 
@@ -41,17 +52,21 @@ class ProjectController {
         createdBy: token.id,
       })
 
-      res.status(StatusCodes.CREATED).json({
-        success: true,
-        project,
-      })
+      res
+        .status(StatusCodes.CREATED)
+        .json(new APIResponse(StatusCodes.CREATED, project))
     } catch (error: any) {
       logEndpointError(error?.message, req, { body: req.body })
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 
@@ -63,10 +78,15 @@ class ProjectController {
     } catch (error: any) {
       logEndpointError(error?.message, req, { params: req.params })
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 
@@ -78,23 +98,33 @@ class ProjectController {
       const projectByName = await ProjectService.getByName(req.body.name.trim())
 
       if (projectByName && projectByName.id !== id) {
-        res.status(StatusCodes.CONFLICT).json({
-          success: false,
-          error: 'The name already exist.',
-        })
+        res
+          .status(StatusCodes.CONFLICT)
+          .json(
+            new APIResponse(
+              StatusCodes.CONFLICT,
+              null,
+              'The name already exist',
+            ),
+          )
         return
       }
 
       await ProjectService.update(id, req.body)
 
-      res.status(StatusCodes.OK).json({ success: true })
+      res.status(StatusCodes.OK).json(new APIResponse(StatusCodes.OK))
     } catch (error: any) {
       logEndpointError(error?.message, req, { params: req.params })
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        error: error?.message || 'Something went wrong. Try again later.',
-      })
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
     }
   }
 }
