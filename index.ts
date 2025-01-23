@@ -1,11 +1,14 @@
 import express from 'express'
 import { dailyCheck } from '@jobs/dailyCheck'
+import { useMorgan } from '@logger/index'
 import { AuthRouter, ClientRouter, ProjectRouter, UserRouter } from '@routers'
 
 const app = express()
 const port = 3000
 
+app.use(useMorgan())
 app.use(express.json())
+
 app.use('/auth', AuthRouter)
 app.use('/user', UserRouter)
 app.use('/client', ClientRouter)
