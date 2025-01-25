@@ -1,7 +1,7 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { logEndpointError } from '@logger/index'
-import { AuthService, UserService } from '@services'
+import { AuthService, JwtService, UserService } from '@services'
 import { APIResponse } from '@utils/classes'
 import { userRegistrationPayload } from '@validation/schemas'
 
@@ -38,7 +38,7 @@ class AuthController {
     try {
       res.status(StatusCodes.OK).json(
         new APIResponse(StatusCodes.OK, {
-          token: AuthService.createExpiredToken(),
+          token: JwtService.createExpiredToken(),
         }),
       )
     } catch (error: any) {
@@ -67,13 +67,24 @@ class AuthController {
         !user ||
         (await AuthService.checkUserPassword(password, user.passwordHash))
       ) {
-        const token = AuthService.createAuthToken({
+        const payload = {
           id: user!.id,
           username: user!.username,
           email,
-        })
+        }
+        const token = JwtService.createAccessToken(payload)
+
         res
+          .cookie(
+            'refreshToken',
+            await JwtService.createRefreshToken(user.id),
+            {
+              httpOnly: true,
+              sameSite: 'strict',
+            },
+          )
           .status(StatusCodes.CREATED)
+          .header('Authorization', token)
           .json(
             new APIResponse(
               StatusCodes.CREATED,

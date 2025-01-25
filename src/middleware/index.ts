@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import jwt, { TokenExpiredError } from 'jsonwebtoken'
+import { TokenExpiredError } from 'jsonwebtoken'
 import { z, ZodError, ZodIssue } from 'zod'
+import { JwtService } from '@services'
 import { APIResponse } from '@utils/classes'
 
 class Middleware {
@@ -38,7 +39,8 @@ class Middleware {
     }
 
     try {
-      const decoded = jwt.verify(token!, process.env.JWT_SECRET!)
+      const decoded = JwtService.decryptAccessToken(token)
+      // ! Attach token to the request
       ;(req as any).authToken = decoded
       next()
     } catch (err) {
