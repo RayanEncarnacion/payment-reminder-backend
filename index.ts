@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser'
 import express from 'express'
 import { dailyCheck } from '@jobs/dailyCheck'
 import { useMorgan } from '@logger/index'
@@ -9,6 +10,7 @@ const port = process.env.PORT || 3000
 
 app.use(useMorgan())
 app.use(express.json())
+app.use(cookieParser())
 
 app.use('/auth', AuthRouter)
 app.use('/user', UserRouter)
