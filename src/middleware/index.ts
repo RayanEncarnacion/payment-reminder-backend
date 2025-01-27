@@ -39,7 +39,7 @@ class Middleware {
     }
 
     try {
-      const decoded = JwtService.decryptAccessToken(token)
+      const decoded = JwtService.verifyAccessToken(token)
       // ! Attach token to the request
       ;(req as any).authToken = decoded
       next()
