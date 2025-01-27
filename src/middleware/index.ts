@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import { rateLimit } from 'express-rate-limit'
 import { StatusCodes } from 'http-status-codes'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { z, ZodError, ZodIssue } from 'zod'
@@ -60,6 +61,24 @@ class Middleware {
         .status(StatusCodes.FORBIDDEN)
         .json(new APIResponse(StatusCodes.FORBIDDEN, null, 'Invalid token'))
     }
+  }
+
+  rateLimit({
+    windowMs = 600000, // ! 10 minutes window
+    limit = 20,
+    message = 'Too many requests, please try again later.',
+  }) {
+    return rateLimit({
+      windowMs,
+      limit,
+      legacyHeaders: false,
+      message: {
+        message,
+        success: false,
+        statusCode: 429,
+        data: null,
+      },
+    })
   }
 }
 

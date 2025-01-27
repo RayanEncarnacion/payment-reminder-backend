@@ -9,7 +9,7 @@ import {
 
 export default express
   .Router()
-  .get('/', ClientController.getAll)
+  .get('/', _middleware.rateLimit({ limit: 3 }), ClientController.getAll)
   .post(
     '/',
     _middleware.validateAuthToken,
