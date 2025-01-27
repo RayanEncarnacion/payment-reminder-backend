@@ -72,7 +72,7 @@ export const paymentsTable = mysqlTable('payments', {
   createdAt: datetime().default(new Date()),
 })
 
-export const refreshTokens = mysqlTable('refreshTokens', {
+export const refreshTokensTable = mysqlTable('refreshTokens', {
   id: serial().primaryKey(),
   tokenId: char({ length: 32 }).primaryKey(),
   userId: bigint({ mode: 'number', unsigned: true })

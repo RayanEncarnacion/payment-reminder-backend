@@ -58,6 +58,8 @@ class AuthController {
 
   async signIn(req: Request, res: Response) {
     try {
+      // TODO: Validate accessToken ot avoid token reuse
+
       const { email, password } = req.body as userRegistrationPayload
 
       // TODO: Create method to validate (49 - 53)
@@ -83,11 +85,11 @@ class AuthController {
               sameSite: 'strict',
             },
           )
-          .status(StatusCodes.CREATED)
+          .status(StatusCodes.OK)
           .header('Authorization', token)
           .json(
             new APIResponse(
-              StatusCodes.CREATED,
+              StatusCodes.OK,
               { token },
               'Logged in successfully',
             ),
@@ -102,6 +104,82 @@ class AuthController {
         )
     } catch (error: any) {
       logEndpointError(error?.message, req, { body: req.body })
+
+      res
+        .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
+    }
+  }
+
+  async refreshToken(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.cookies
+      const authToken = req.headers.authorization?.split(' ')[1]
+
+      if (!refreshToken || !authToken) {
+        res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json(
+            new APIResponse(
+              StatusCodes.UNAUTHORIZED,
+              null,
+              'Refresh and Auth tokens must be provided',
+            ),
+          )
+        return
+      }
+
+      const decodedAuthToken = JwtService.decodeAccessToken(authToken)
+      const decodedRefreshToken = await JwtService.getRefreshToken(refreshToken)
+
+      if (decodedRefreshToken.used) {
+        res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json(
+            new APIResponse(
+              StatusCodes.UNAUTHORIZED,
+              null,
+              'Invalid refresh token',
+            ),
+          )
+        return
+      }
+
+      const payload = {
+        id: decodedAuthToken!.id,
+        username: decodedAuthToken!.username,
+        email: decodedAuthToken.email,
+      }
+      const newAccessToken = JwtService.createAccessToken(payload)
+      const newRefreshToken = await JwtService.createRefreshToken(payload.id)
+
+      await JwtService.markRefreshTokenAsUsed(decodedRefreshToken.id)
+
+      res
+        .cookie('refreshToken', newRefreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+        })
+        .status(StatusCodes.CREATED)
+        .header('Authorization', newAccessToken)
+        .json(
+          new APIResponse(
+            StatusCodes.CREATED,
+            { token: newAccessToken },
+            'Token refreshed successfully',
+          ),
+        )
+    } catch (error: any) {
+      logEndpointError(error?.message, req, {
+        cookies: req.cookies,
+        headers: req.headers,
+      })
 
       res
         .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)

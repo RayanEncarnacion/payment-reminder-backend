@@ -16,4 +16,5 @@ export default express
     _middleware.validateBody(userSignInSchema),
     AuthController.signIn,
   )
+  .post('/refresh', AuthController.refreshToken)
   .post('/logout', AuthController.logout)
