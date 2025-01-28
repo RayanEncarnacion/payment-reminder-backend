@@ -1,6 +1,6 @@
 import express from 'express'
 import { ProjectController } from '@controllers'
-import _middleware from '@middleware'
+import Middleware from '@middleware'
 import {
   createProjectSchema,
   idParamSchema,
@@ -12,20 +12,20 @@ export default express
   .get('/', ProjectController.getAll)
   .post(
     '/',
-    _middleware.validateAuthToken,
-    _middleware.validateBody(createProjectSchema),
+    Middleware.validateAuthToken,
+    Middleware.validateBody(createProjectSchema),
     ProjectController.create,
   )
   .put(
     '/:id',
-    _middleware.validateAuthToken,
-    _middleware.validateParams(idParamSchema),
-    _middleware.validateBody(updateProjectSchema),
+    Middleware.validateAuthToken,
+    Middleware.validateParams(idParamSchema),
+    Middleware.validateBody(updateProjectSchema),
     ProjectController.update,
   )
   .delete(
     '/:id',
-    _middleware.validateAuthToken,
-    _middleware.validateParams(idParamSchema),
+    Middleware.validateAuthToken,
+    Middleware.validateParams(idParamSchema),
     ProjectController.delete,
   )
