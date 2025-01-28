@@ -13,12 +13,38 @@ import { updateProjectPayload } from '@validation/schemas'
 import { BaseService } from './base'
 
 class ProjectService extends BaseService<typeof projectsTable> {
+  #table
+
+  constructor(table: typeof projectsTable) {
+    super(table)
+    this.#table = table
+  }
+
   async getAll() {
     return await super.getAll()
   }
 
-  async create(project: typeof projectsTable.$inferInsert) {
-    return await super.create(project)
+  async create(
+    project: typeof projectsTable.$inferInsert & { dates: number[] },
+  ) {
+    const projectId = await db.transaction(async (tx) => {
+      const [{ id: projectId }] = await tx
+        .insert(this.#table)
+        .values(project)
+        .$returningId()
+
+      project.dates.forEach(
+        async (day) =>
+          await tx.insert(projectDatesTable).values({
+            projectId,
+            day,
+            createdBy: project.createdBy,
+          }),
+      )
+      return projectId
+    })
+
+    return await super.getById(projectId)
   }
 
   async delete(id: number) {
@@ -82,8 +108,6 @@ class ProjectService extends BaseService<typeof projectsTable> {
           dueDate,
           projectId: id,
         })
-
-        console.log('Payment generated!')
       })
     })
   }
@@ -113,8 +137,6 @@ class ProjectService extends BaseService<typeof projectsTable> {
         ...row,
         dueDate: correctUTCDate(row.dueDate).toLocaleDateString(),
       })
-
-      console.log('Reminder sent!')
     })
   }
 }

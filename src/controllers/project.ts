@@ -28,7 +28,7 @@ class ProjectController {
 
   async create(req: Request, res: Response) {
     try {
-      const { name, clientId, amount } = req.body as createProjectPayload
+      const { name, clientId, amount, dates } = req.body as createProjectPayload
 
       // TODO: Move validation to "ProjectService.create" method
       if (!(await ClientService.existsById(clientId))) {
@@ -50,6 +50,7 @@ class ProjectController {
         clientId,
         amount: amount.toFixed(2),
         createdBy: token.id,
+        dates,
       })
 
       res

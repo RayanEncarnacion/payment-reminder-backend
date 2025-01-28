@@ -27,9 +27,10 @@ export const createClientSchema = z.object({
 export const createProjectSchema = z.object({
   name: z.string().max(100),
   clientId: z.number().nonnegative().min(1),
-  amount: z.number().refine((val) => val.toFixed(2) === `${val}`, {
+  amount: z.number().refine((val) => Number.isInteger(val * 100), {
     message: 'Must have up to 2 decimal places',
   }),
+  dates: z.array(z.number()).min(1, 'At least one date is required'),
 })
 
 export const updateClientSchema = createClientSchema.extend({
@@ -38,13 +39,12 @@ export const updateClientSchema = createClientSchema.extend({
 
 export const updateProjectSchema = createProjectSchema
   .extend({
-    name: z.string().max(100),
     active: z.number().min(0).max(1).nonnegative(),
   })
   .omit({ clientId: true })
 
 export const idParamSchema = z.object({
-  id: z.string().regex(/^\d+$/, 'ID must be a anumber'),
+  id: z.string().regex(/^\d+$/, 'ID must be a number'),
 })
 
 export type createClientPayload = z.infer<typeof createClientSchema>
