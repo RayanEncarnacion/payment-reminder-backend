@@ -16,7 +16,10 @@ export class BaseService<T extends DBTables> {
   }
 
   async getAll() {
-    return await db.select().from(this.#table).where(eq(this.#table.deleted, 0))
+    return (await db
+      .select()
+      .from(this.#table)
+      .where(eq(this.#table.deleted, 0))) as T['$inferSelect'][]
   }
 
   async getById(id: number) {
@@ -25,8 +28,7 @@ export class BaseService<T extends DBTables> {
         .select()
         .from(this.#table)
         .where(and(eq(this.#table.id, id), eq(this.#table.deleted, 0)))
-        .limit(1)
-    )[0]
+    )[0] as T['$inferSelect']
   }
 
   async delete(id: number) {
@@ -44,11 +46,7 @@ export class BaseService<T extends DBTables> {
   }
 
   async create(payload: T['$inferInsert']) {
-    const [{ id }] = (await db
-      .insert(this.#table)
-      .values(payload)
-      .$returningId()) as any
-
+    const [{ id }] = await db.insert(this.#table).values(payload).$returningId()
     return await this.getById(id)
   }
 }
