@@ -1,19 +1,17 @@
 import { redisClient } from '@db/redis'
-
-export interface IRedisService {
-  get(key: string): Promise<string | null>
-  set(key: string, value: any, options?: { EX: number }): void
-  addToList(key: string, value: any): void
-  removeFromList(listKey: string, identifier: any, identifierValue: any): void
-}
+import { IRedisService } from '@services/types'
 
 class RedisService implements IRedisService {
   async get(key: string) {
     return await redisClient.get(key)
   }
 
-  async set(key: string, value: any, options: { EX: number } = { EX: 300 }) {
-    redisClient.set(key, JSON.stringify(value), options)
+  async remove(key: string) {
+    return await redisClient.del(key)
+  }
+
+  async set(key: string, value: string, options: { EX: number } = { EX: 300 }) {
+    redisClient.set(key, value, options)
   }
 
   async addToList(key: string, value: any) {
