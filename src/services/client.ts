@@ -1,44 +1,39 @@
 import 'dotenv/config'
-import { RedisClientType } from '@redis/client'
 import { eq, and, or } from 'drizzle-orm'
 import { db } from '@db'
-import { redisClient } from '@db/redis'
 import { clientsTable, projectsTable } from '@db/schemas'
+import { RedisService } from '@services'
 import { updateClientPayload } from '@validation/schemas'
 import { BaseService } from './base'
+import { IRedisService } from './redis'
 
 class ClientService extends BaseService<typeof clientsTable> {
-  redisClient: RedisClientType
+  redis: IRedisService
 
-  constructor(
-    table: typeof clientsTable,
-    redisClient: RedisClientType<any, any, any>,
-  ) {
+  constructor(table: typeof clientsTable, redisService: IRedisService) {
     super(table)
-    this.redisClient = redisClient
+    this.redis = redisService
   }
 
   async existsById(id: number) {
-    const cachedValue = await this.redisClient.get('client:' + id)
-    if (cachedValue) return true
-
     return await super.existsById(id)
   }
 
   async create(client: typeof clientsTable.$inferInsert) {
-    return await super.create(client)
+    const createdClient = await super.create(client)
+    this.redis.addToList('clients', createdClient)
+
+    return createdClient
   }
 
   async getAll() {
-    const cachedValue = await this.redisClient.get('clients')
+    const cachedValue = await this.redis.get('clients')
 
     if (cachedValue)
       return JSON.parse(cachedValue) as (typeof clientsTable.$inferSelect)[]
 
     const clients = await super.getAll()
-    this.redisClient.set('clients', JSON.stringify(clients), {
-      EX: 300, // ! 5mins to mark as stale
-    })
+    this.redis.set('clients', JSON.stringify(clients))
 
     return clients
   }
@@ -85,4 +80,4 @@ class ClientService extends BaseService<typeof clientsTable> {
   }
 }
 
-export default new ClientService(clientsTable, redisClient)
+export default new ClientService(clientsTable, RedisService)
