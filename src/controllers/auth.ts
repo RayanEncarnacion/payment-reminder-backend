@@ -63,7 +63,7 @@ class AuthController {
       const { email, password } = req.body as userRegistrationPayload
 
       // TODO: Create method to validate (49 - 53)
-      const user = await UserService.getUserByEmail(email)
+      const user = await UserService.getByEmail(email)
 
       if (
         !user ||

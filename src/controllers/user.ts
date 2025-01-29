@@ -9,7 +9,7 @@ class UserController {
     try {
       res
         .status(StatusCodes.OK)
-        .json(new APIResponse(StatusCodes.OK, await UserService.getUsers()))
+        .json(new APIResponse(StatusCodes.OK, await UserService.getAll()))
     } catch (error: any) {
       logEndpointError(error?.message, req)
 
