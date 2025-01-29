@@ -2,10 +2,9 @@ import 'dotenv/config'
 import { eq, and, or } from 'drizzle-orm'
 import { db } from '@db'
 import { clientsTable, projectsTable } from '@db/schemas'
-import { RedisService } from '@services'
+import { IRedisService, RedisService } from '@services'
 import { updateClientPayload } from '@validation/schemas'
 import { BaseService } from './base'
-import { IRedisService } from './redis'
 
 class ClientService extends BaseService<typeof clientsTable> {
   redis: IRedisService
@@ -28,7 +27,6 @@ class ClientService extends BaseService<typeof clientsTable> {
 
   async getAll() {
     const cachedValue = await this.redis.get('clients')
-
     if (cachedValue)
       return JSON.parse(cachedValue) as (typeof clientsTable.$inferSelect)[]
 
@@ -54,6 +52,8 @@ class ClientService extends BaseService<typeof clientsTable> {
         .update(projectsTable)
         .set({ deleted: 1 })
         .where(eq(projectsTable.clientId, id))
+
+      this.redis.removeFromList('clients', 'id', id)
     })
   }
 
