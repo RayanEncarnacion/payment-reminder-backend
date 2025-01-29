@@ -2,18 +2,10 @@ import 'dotenv/config'
 import { eq, and, or } from 'drizzle-orm'
 import { db } from '@db'
 import { clientsTable, projectsTable } from '@db/schemas'
-import { IRedisService, RedisService } from '@services'
+import { BaseService, RedisService } from '@services'
 import { updateClientPayload } from '@validation/schemas'
-import { BaseService } from './base'
 
 class ClientService extends BaseService<typeof clientsTable> {
-  redis: IRedisService
-
-  constructor(table: typeof clientsTable, redisService: IRedisService) {
-    super(table)
-    this.redis = redisService
-  }
-
   async existsById(id: number) {
     return await super.existsById(id)
   }
@@ -26,14 +18,7 @@ class ClientService extends BaseService<typeof clientsTable> {
   }
 
   async getAll() {
-    const cachedValue = await this.redis.get('clients')
-    if (cachedValue)
-      return JSON.parse(cachedValue) as (typeof clientsTable.$inferSelect)[]
-
-    const clients = await super.getAll()
-    this.redis.set('clients', JSON.stringify(clients))
-
-    return clients
+    return await super.getAll()
   }
 
   async getByEmail(email: string) {
@@ -52,8 +37,6 @@ class ClientService extends BaseService<typeof clientsTable> {
         .update(projectsTable)
         .set({ deleted: 1 })
         .where(eq(projectsTable.clientId, id))
-
-      this.redis.removeFromList('clients', 'id', id)
     })
   }
 

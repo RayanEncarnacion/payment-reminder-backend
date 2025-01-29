@@ -7,19 +7,12 @@ import {
   projectDatesTable,
   projectsTable,
 } from '@db/schemas'
+import { BaseService, RedisService } from '@services'
 import MailService from '@services/mail'
 import { correctUTCDate } from '@utils'
 import { updateProjectPayload } from '@validation/schemas'
-import { BaseService } from './base'
 
 class ProjectService extends BaseService<typeof projectsTable> {
-  #table
-
-  constructor(table: typeof projectsTable) {
-    super(table)
-    this.#table = table
-  }
-
   async getAll() {
     return await super.getAll()
   }
@@ -29,7 +22,7 @@ class ProjectService extends BaseService<typeof projectsTable> {
   ) {
     const projectId = await db.transaction(async (tx) => {
       const [{ id: projectId }] = await tx
-        .insert(this.#table)
+        .insert(this.table)
         .values(project)
         .$returningId()
 
@@ -52,6 +45,7 @@ class ProjectService extends BaseService<typeof projectsTable> {
   }
 
   async update(id: number, project: updateProjectPayload) {
+    // TODO: Delete project dates and insert new ones
     await db
       .update(projectsTable)
       .set({
@@ -146,4 +140,4 @@ function getDueDate(day: number) {
   return new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
 }
 
-export default new ProjectService(projectsTable)
+export default new ProjectService(projectsTable, RedisService)

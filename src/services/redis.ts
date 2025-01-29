@@ -1,5 +1,5 @@
 import { redisClient } from '@db/redis'
-import { IRedisService } from '@services/types'
+import { type IRedisService } from '@services/types'
 
 class RedisService implements IRedisService {
   async get(key: string) {

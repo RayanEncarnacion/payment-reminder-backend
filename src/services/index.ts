@@ -1,5 +1,6 @@
 export * from './types'
 export { default as RedisService } from './redis'
+export { default as BaseService } from './base'
 export { default as JwtService } from './jwt'
 export { default as AuthService } from './auth'
 export { default as UserService } from './user'
