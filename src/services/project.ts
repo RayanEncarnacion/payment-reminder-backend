@@ -12,10 +12,6 @@ import { correctUTCDate } from '@utils'
 import { updateProjectPayload } from '@validation/schemas'
 
 class ProjectService extends BaseService<typeof projectsTable> {
-  async getAll() {
-    return await super.getAll()
-  }
-
   async create(
     project: typeof projectsTable.$inferInsert & { dates: number[] },
   ) {
@@ -37,10 +33,6 @@ class ProjectService extends BaseService<typeof projectsTable> {
     })
 
     return await super.getById(projectId)
-  }
-
-  async delete(id: number) {
-    await super.delete(id)
   }
 
   async update(id: number, project: updateProjectPayload) {
