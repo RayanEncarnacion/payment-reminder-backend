@@ -1,7 +1,6 @@
 import 'dotenv/config'
-import { eq, and } from 'drizzle-orm'
-import { db } from '@db'
-import { DBTables } from '@db/schemas'
+import { eq, desc, and } from 'drizzle-orm'
+import { db, DBTables } from '@db'
 import { type IRedisService } from '@services'
 
 class BaseService<T extends DBTables> {
@@ -26,7 +25,8 @@ class BaseService<T extends DBTables> {
     const values = (await db
       .select()
       .from(this.table)
-      .where(eq(this.table.deleted, 0))) as T['$inferSelect'][]
+      .where(eq(this.table.deleted, 0))
+      .orderBy(desc(this.table.id))) as T['$inferSelect'][]
     this.redis.set(this.tableName, JSON.stringify(values))
 
     return values
@@ -42,16 +42,27 @@ class BaseService<T extends DBTables> {
   }
 
   async delete(id: number) {
-    this.redis.removeFromList(this.tableName, 'id', id)
-    await db.update(this.table).set({ deleted: 1 }).where(eq(this.table.id, id))
+    const result = await db
+      .update(this.table)
+      .set({ deleted: 1 })
+      .where(eq(this.table.id, id))
+
+    if (!result.length) return
+    this.redis.removeListItem(this.tableName, 'id', id)
   }
 
-  // TODO: Update cache in this method
   async update(id: number, payload: any) {
     await db
       .update(this.table)
       .set(payload)
       .where(and(eq(this.table.id, id), eq(this.table.deleted, 0)))
+
+    const updatedRow = await this.getById(id)
+
+    if (!updatedRow) return
+    this.redis.updateListItem(this.tableName, 'id', id, updatedRow)
+
+    return updatedRow
   }
 
   async create(payload: T['$inferInsert']) {

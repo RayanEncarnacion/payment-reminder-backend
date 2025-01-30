@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import { eq, and, or } from 'drizzle-orm'
-import { db } from '@db'
-import { clientsTable, projectsTable } from '@db/schemas'
+import { db, clientsTable, projectsTable } from '@db'
 import { BaseService, RedisService } from '@services'
 import { updateClientPayload } from '@validation/schemas'
 
@@ -33,18 +32,21 @@ class ClientService extends BaseService<typeof clientsTable> {
         .update(clientsTable)
         .set({ deleted: 1 })
         .where(eq(clientsTable.id, id))
+
       await tx
         .update(projectsTable)
         .set({ deleted: 1 })
         .where(eq(projectsTable.clientId, id))
     })
+
+    this.redis.removeListItem('clients', 'id', id)
   }
 
   async update(id: number, payload: updateClientPayload) {
-    await super.update(id, payload)
+    return await super.update(id, payload)
   }
 
-  async getProjectsById(id: number) {
+  async getWithProjects(id: number) {
     return await db
       .select()
       .from(projectsTable)

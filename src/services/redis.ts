@@ -1,5 +1,5 @@
-import { redisClient } from '@db/redis'
-import { type IRedisService } from '@services/types'
+import { redisClient } from '@db'
+import { type IRedisService } from '@services'
 
 class RedisService implements IRedisService {
   async get(key: string) {
@@ -22,18 +22,34 @@ class RedisService implements IRedisService {
     })
   }
 
-  async removeFromList(listKey: string, identifier: any, identifierValue: any) {
-    const cachedList = JSON.parse((await redisClient.get(listKey)) || '[]')
+  // eslint-disable-next-line no-unused-vars
+  private async updateList(listKey: string, filterFn: (list: any[]) => any[]) {
+    const cachedList = await redisClient.get(listKey)
 
-    if (!Array.isArray(cachedList))
-      throw new Error('Key provided does not contain a list')
+    if (!cachedList) return
+    const updatedList = filterFn(JSON.parse(cachedList))
+    redisClient.set(listKey, JSON.stringify(updatedList), { EX: 300 })
+  }
 
-    const updatedValues = cachedList.filter(
-      (value: any) => value[identifier] !== identifierValue,
-    )
-    redisClient.set(listKey, JSON.stringify(updatedValues), {
-      EX: 300,
-    })
+  async updateListItem(
+    listKey: string,
+    identifier: string,
+    identifierValue: any,
+    newValue: any,
+  ) {
+    const filterFn = (list: any[]) =>
+      list.map((value: any) =>
+        value[identifier] === identifierValue ? newValue : value,
+      )
+
+    this.updateList(listKey, filterFn)
+  }
+
+  async removeListItem(listKey: string, identifier: any, identifierValue: any) {
+    const filterFn = (list: any[]) =>
+      list.filter((value: any) => value[identifier] !== identifierValue)
+
+    this.updateList(listKey, filterFn)
   }
 }
 
