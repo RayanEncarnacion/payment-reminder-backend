@@ -144,7 +144,7 @@ class ClientController {
 
   async getProjectsById(req: Request, res: Response) {
     try {
-      const projectsOfClient = await ClientService.getProjectsById(
+      const projectsOfClient = await ClientService.getWithProjects(
         parseInt(req.params.id, 10),
       )
       res

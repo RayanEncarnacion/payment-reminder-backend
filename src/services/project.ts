@@ -1,14 +1,13 @@
 import 'dotenv/config'
 import { eq, and, lt } from 'drizzle-orm'
-import { db } from '@db'
 import {
+  db,
   clientsTable,
   paymentsTable,
   projectDatesTable,
   projectsTable,
-} from '@db/schemas'
-import { BaseService, RedisService } from '@services'
-import MailService from '@services/mail'
+} from '@db'
+import { BaseService, RedisService, MailService } from '@services'
 import { correctUTCDate } from '@utils'
 import { updateProjectPayload } from '@validation/schemas'
 
@@ -46,13 +45,7 @@ class ProjectService extends BaseService<typeof projectsTable> {
 
   async update(id: number, project: updateProjectPayload) {
     // TODO: Delete project dates and insert new ones
-    await db
-      .update(projectsTable)
-      .set({
-        name: project.name,
-        active: +project.active,
-      })
-      .where(eq(projectsTable.id, id))
+    return await super.update(id, project)
   }
 
   async getByName(name: string) {

@@ -1,5 +1,5 @@
 import cookieParser from 'cookie-parser'
-import express from 'express'
+import express, { json } from 'express'
 import { dailyCheck } from '@jobs/dailyCheck'
 import { useMorgan } from '@logger/index'
 import { AuthRouter, ClientRouter, ProjectRouter, UserRouter } from '@routers'
@@ -8,14 +8,14 @@ import 'dotenv/config'
 const app = express()
 const port = process.env.PORT || 3000
 
-app.use(useMorgan())
-app.use(express.json())
 app.use(cookieParser())
+app.use(json())
+app.use(useMorgan())
 
 app.use('/auth', AuthRouter)
-app.use('/user', UserRouter)
 app.use('/client', ClientRouter)
 app.use('/project', ProjectRouter)
+app.use('/user', UserRouter)
 
 dailyCheck()
 

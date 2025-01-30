@@ -1,4 +1,4 @@
-import 'dotenv/config'
-import { drizzle } from 'drizzle-orm/mysql2'
-
-export const db = drizzle(process.env.DATABASE_URL!, { logger: true })
+export * from './db'
+export * from './redis'
+export * from './schemas'
+export * from './types'

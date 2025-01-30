@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import { eq } from 'drizzle-orm'
-import { db } from '@db'
-import { usersTable } from '@db/schemas'
+import { db, usersTable } from '@db'
 import { RedisService, BaseService } from '@services'
 
 class UserService extends BaseService<typeof usersTable> {

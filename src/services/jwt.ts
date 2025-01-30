@@ -2,10 +2,9 @@ import * as crypto from 'crypto'
 import { eq } from 'drizzle-orm'
 import { StatusCodes } from 'http-status-codes'
 import jwt, { JwtPayload } from 'jsonwebtoken'
-import { db } from '@db'
-import 'dotenv/config'
-import { refreshTokensTable } from '@db/schemas'
+import { db, refreshTokensTable } from '@db'
 import { APIError } from '@utils/classes'
+import 'dotenv/config'
 
 class JwtService {
   createAccessToken(payload: Record<string, any>) {

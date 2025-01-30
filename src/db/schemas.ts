@@ -81,8 +81,3 @@ export const refreshTokensTable = mysqlTable('refreshTokens', {
   used: tinyint().default(0).notNull(),
   expiresAt: datetime().notNull(),
 })
-
-export type DBTables =
-  | typeof usersTable
-  | typeof clientsTable
-  | typeof projectsTable
