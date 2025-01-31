@@ -10,7 +10,9 @@ class ProjectController {
     try {
       res
         .status(StatusCodes.OK)
-        .json(new APIResponse(StatusCodes.OK, await ProjectService.getAll()))
+        .json(
+          new APIResponse(StatusCodes.OK, await ProjectService.getWithDates()),
+        )
     } catch (error: any) {
       logEndpointError(error?.message, req)
 
@@ -30,7 +32,6 @@ class ProjectController {
     try {
       const { name, clientId, amount, dates } = req.body as createProjectPayload
 
-      // TODO: Move validation to "ProjectService.create" method
       if (!(await ClientService.existsById(clientId))) {
         res
           .status(StatusCodes.NOT_FOUND)
@@ -94,8 +95,6 @@ class ProjectController {
   async update(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id, 10)
-
-      // TODO: Move validation to "ProjectService.update" method (72 - 80)
       const projectByName = await ProjectService.getByName(req.body.name.trim())
 
       if (projectByName && projectByName.id !== id) {

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { eq, and, lt } from 'drizzle-orm'
+import { eq, and, lt, sql } from 'drizzle-orm'
 import {
   db,
   clientsTable,
@@ -12,6 +12,32 @@ import { correctUTCDate } from '@utils'
 import { updateProjectPayload } from '@validation/schemas'
 
 class ProjectService extends BaseService<typeof projectsTable> {
+  async getWithDates() {
+    return await db
+      .select({
+        project: projectsTable,
+        dates: sql`
+          CASE
+            WHEN COUNT(${projectDatesTable.id}) = 0 THEN NULL
+            ELSE JSON_ARRAYAGG(
+                JSON_OBJECT(
+                  'id', ${projectDatesTable.id},
+                  'projectId', ${projectDatesTable.projectId},
+                  'day', ${projectDatesTable.day}
+                )
+              )
+          END
+        `.as('dates'),
+      })
+      .from(projectsTable)
+      .leftJoin(
+        projectDatesTable,
+        eq(projectDatesTable.projectId, projectsTable.id),
+      )
+      .groupBy(projectsTable.id)
+      .execute()
+  }
+
   async create(
     project: typeof projectsTable.$inferInsert & { dates: number[] },
   ) {
