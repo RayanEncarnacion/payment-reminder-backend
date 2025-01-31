@@ -17,7 +17,7 @@ class ProjectService extends BaseService<typeof projectsTable> {
   ) {
     const projectId = await db.transaction(async (tx) => {
       const [{ id: projectId }] = await tx
-        .insert(this.table)
+        .insert(projectsTable)
         .values(project)
         .$returningId()
 
@@ -36,8 +36,34 @@ class ProjectService extends BaseService<typeof projectsTable> {
   }
 
   async update(id: number, project: updateProjectPayload) {
-    // TODO: Delete project dates and insert new ones
-    return await super.update(id, project)
+    return await db.transaction(async (tx) => {
+      await tx
+        .update(projectsTable)
+        .set({
+          active: project.active,
+          amount: project.amount.toFixed(2),
+          name: project.name,
+        })
+        .where(and(eq(projectsTable.id, id), eq(projectsTable.deleted, 0)))
+
+      const projectRow = await super.getById(id)
+
+      await tx
+        .update(projectDatesTable)
+        .set({ deleted: 1 })
+        .where(eq(projectDatesTable.projectId, id))
+
+      project.dates.forEach(
+        async (day) =>
+          await tx.insert(projectDatesTable).values({
+            day,
+            projectId: id,
+            createdBy: projectRow.createdBy,
+          }),
+      )
+
+      return projectRow
+    })
   }
 
   async getByName(name: string) {
