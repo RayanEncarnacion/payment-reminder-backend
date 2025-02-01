@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { eq, and, lt, sql } from 'drizzle-orm'
 import {
   db,

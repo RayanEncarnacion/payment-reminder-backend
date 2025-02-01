@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { eq, desc, and } from 'drizzle-orm'
 import { db, DBTables } from '@db'
 import { type IRedisService } from '@services'

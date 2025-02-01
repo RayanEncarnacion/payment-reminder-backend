@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { eq, and, or } from 'drizzle-orm'
 import { db, clientsTable, projectsTable } from '@db'
 import { BaseService, RedisService } from '@services'

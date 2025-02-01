@@ -1,10 +1,9 @@
-import 'dotenv/config'
 import bcrypt from 'bcrypt'
 
 class AuthService {
   async hashPassword(password: string) {
     try {
-      return await bcrypt.hash(password, +process.env.SALT_ROUNDS!)
+      return await bcrypt.hash(password, 10)
     } catch (error) {
       console.error(error)
       throw new Error('There was an error hashing the password')

@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { eq, getTableColumns, sql } from 'drizzle-orm'
 import { clientsTable, db, paymentsTable, projectsTable } from '@db'
 import { RedisService, BaseService } from '@services'
