@@ -4,12 +4,12 @@ import { clientsTable, db, paymentsTable, projectsTable } from '@db'
 import { RedisService, BaseService } from '@services'
 
 class PaymentService extends BaseService<typeof paymentsTable> {
-  async getWithDates() {
-    return await db
+  getWithDates = async () =>
+    await db
       .select({
         payment: {
           ...getTableColumns(paymentsTable),
-          isDue: sql<boolean>`${paymentsTable.dueDate} < CURDATE()`.as('isDue'),
+          isDue: sql<boolean>`${paymentsTable.dueDate} < CURDATE()`,
         },
         project: {
           id: projectsTable.id,
@@ -30,7 +30,6 @@ class PaymentService extends BaseService<typeof paymentsTable> {
       .leftJoin(clientsTable, eq(projectsTable.clientId, clientsTable.id))
       .groupBy(paymentsTable.id)
       .execute()
-  }
 }
 
 export default new PaymentService(paymentsTable, RedisService)

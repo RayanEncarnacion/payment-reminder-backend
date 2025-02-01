@@ -26,8 +26,7 @@ class ProjectService extends BaseService<typeof projectsTable> {
                   'day', ${projectDatesTable.day}
                 )
               )
-          END
-        `.as('dates'),
+          END`,
       })
       .from(projectsTable)
       .leftJoin(
