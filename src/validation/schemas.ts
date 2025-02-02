@@ -37,6 +37,10 @@ export const updateClientSchema = createClientSchema.extend({
   active: z.number().min(0).max(1).nonnegative(),
 })
 
+export const updatePaymentSchema = z.object({
+  payed: z.number().min(0).max(1).nonnegative(),
+})
+
 export const updateProjectSchema = createProjectSchema
   .extend({
     active: z.number().min(0).max(1).nonnegative(),
@@ -51,3 +55,4 @@ export type createClientPayload = z.infer<typeof createClientSchema>
 export type updateClientPayload = z.infer<typeof updateClientSchema>
 export type createProjectPayload = z.infer<typeof createProjectSchema>
 export type updateProjectPayload = z.infer<typeof updateProjectSchema>
+export type updatePaymentPayload = z.infer<typeof updatePaymentSchema>

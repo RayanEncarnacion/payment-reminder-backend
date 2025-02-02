@@ -26,6 +26,26 @@ class PaymentController {
         )
     }
   }
+
+  async update(req: Request, res: Response) {
+    try {
+      await PaymentService.markAsPayed(parseInt(req.params.id, 10))
+
+      res.status(StatusCodes.NO_CONTENT).end()
+    } catch (error: any) {
+      logEndpointError(error?.message, req)
+
+      res
+        .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(
+          new APIResponse(
+            error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+            null,
+            error.message,
+          ),
+        )
+    }
+  }
 }
 
 export default new PaymentController()
