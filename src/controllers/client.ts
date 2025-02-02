@@ -75,12 +75,16 @@ class ClientController {
   async delete(req: Request, res: Response) {
     try {
       const client = await ClientService.getById(parseInt(req.params.id, 10))
-      if (!client)
+
+      if (!client) {
         res
           .status(StatusCodes.NOT_FOUND)
           .json(
             new APIResponse(StatusCodes.NOT_FOUND, null, 'Client not found.'),
           )
+
+        return
+      }
       await ClientService.delete(client.id)
 
       res.status(StatusCodes.NO_CONTENT).send()
