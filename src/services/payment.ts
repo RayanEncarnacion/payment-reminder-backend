@@ -3,8 +3,12 @@ import { clientsTable, db, paymentsTable, projectsTable } from '@db'
 import { RedisService, BaseService } from '@services'
 
 class PaymentService extends BaseService<typeof paymentsTable> {
-  getWithDates = async () =>
-    await db
+  getWithDates = async () => {
+    const cachedValue = await this.redis.get(this.tableName)
+
+    if (cachedValue) return JSON.parse(cachedValue)
+
+    const payments = await db
       .select({
         payment: {
           ...getTableColumns(paymentsTable),
@@ -29,6 +33,10 @@ class PaymentService extends BaseService<typeof paymentsTable> {
       .leftJoin(clientsTable, eq(projectsTable.clientId, clientsTable.id))
       .groupBy(paymentsTable.id)
       .execute()
+
+    this.redis.set(this.tableName, JSON.stringify(payments))
+    return payments
+  }
 }
 
 export default new PaymentService(paymentsTable, RedisService)
