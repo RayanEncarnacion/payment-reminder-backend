@@ -56,7 +56,10 @@ class ProjectService extends BaseService<typeof projectsTable> {
       return projectId
     })
 
-    return await super.getById(projectId)
+    const insertedRow = await super.getById(projectId)
+    this.redis.addToList(this.tableName, insertedRow)
+
+    return insertedRow
   }
 
   async update(id: number, project: updateProjectPayload) {
@@ -70,12 +73,12 @@ class ProjectService extends BaseService<typeof projectsTable> {
         })
         .where(and(eq(projectsTable.id, id), eq(projectsTable.deleted, 0)))
 
-      const projectRow = await super.getById(id)
-
       await tx
         .update(projectDatesTable)
         .set({ deleted: 1 })
         .where(eq(projectDatesTable.projectId, id))
+
+      const projectRow = await super.getById(id)
 
       project.dates.forEach(
         async (day) =>
@@ -85,6 +88,8 @@ class ProjectService extends BaseService<typeof projectsTable> {
             createdBy: projectRow.createdBy,
           }),
       )
+
+      this.redis.updateListItem(this.tableName, 'id', id, projectRow)
 
       return projectRow
     })
