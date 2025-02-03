@@ -1,8 +1,9 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { logEndpointError } from '@logger/index'
-import { AuthService, JwtService, UserService } from '@services'
+import { JwtService, UserService } from '@services'
 import { APIResponse } from '@utils/classes'
+import { hashPassword } from '@utils/encryption'
 import { userRegistrationPayload } from '@validation/schemas'
 
 class AuthController {
@@ -13,7 +14,7 @@ class AuthController {
       const user = await UserService.create({
         email,
         username,
-        passwordHash: await AuthService.hashPassword(password),
+        passwordHash: await hashPassword(password),
       })
 
       res
@@ -58,49 +59,35 @@ class AuthController {
 
   async signIn(req: Request, res: Response) {
     try {
-      // TODO: Validate accessToken ot avoid token reuse
+      const user = await UserService.getByCredentials(
+        req.body.email.trim(),
+        req.body.password.trim(),
+      )
 
-      const { email, password } = req.body as userRegistrationPayload
-
-      // TODO: Create method to validate (49 - 53)
-      const user = await UserService.getByEmail(email)
-
-      if (
-        !user ||
-        (await AuthService.checkUserPassword(password, user.passwordHash))
-      ) {
-        const payload = {
-          id: user!.id,
-          username: user!.username,
-          email,
-        }
-        const token = JwtService.createAccessToken(payload)
-
+      if (!user) {
         res
-          .cookie(
-            'refreshToken',
-            await JwtService.createRefreshToken(user.id),
-            {
-              httpOnly: true,
-              sameSite: 'strict',
-            },
-          )
-          .status(StatusCodes.OK)
-          .header('Authorization', token)
+          .status(StatusCodes.NOT_FOUND)
           .json(
-            new APIResponse(
-              StatusCodes.OK,
-              { token },
-              'Logged in successfully',
-            ),
+            new APIResponse(StatusCodes.NOT_FOUND, null, 'Invalid credentials'),
           )
         return
       }
 
+      const token = JwtService.createAccessToken({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      })
+
       res
-        .status(StatusCodes.BAD_REQUEST)
+        .cookie('refreshToken', await JwtService.createRefreshToken(user.id), {
+          httpOnly: true,
+          sameSite: 'strict',
+        })
+        .status(StatusCodes.OK)
+        .header('Authorization', token)
         .json(
-          new APIResponse(StatusCodes.BAD_REQUEST, null, 'Invalid credentials'),
+          new APIResponse(StatusCodes.OK, { token }, 'Logged in successfully'),
         )
     } catch (error: any) {
       logEndpointError(error?.message, req, { body: req.body })
