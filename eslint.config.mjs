@@ -4,27 +4,33 @@ import prettierConfig from 'eslint-config-prettier'
 import typescriptPlugin from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
 import importPlugin from 'eslint-plugin-import'
+import jest from 'eslint-plugin-jest'
+import globals from 'globals'
 
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts', '**/*.test.ts'],
+    ...jest.configs['flat/recommended'],
     languageOptions: {
       parser: typescriptParser,
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
+        ...jest.environments.globals.globals,
+        ...globals.node,
         console: 'readonly',
         process: 'readonly',
       },
     },
-
     plugins: {
       '@typescript-eslint': typescriptPlugin,
+      jest: jest,
       prettier: prettierPlugin,
       import: importPlugin,
     },
     rules: {
+      ...jest.configs['flat/recommended'].rules,
       ...typescriptPlugin.configs.recommended.rules,
       ...prettierConfig.rules,
       'prettier/prettier': 'error',
@@ -56,10 +62,17 @@ export default [
       'import/named': 'error',
       'import/default': 'error',
       'import/namespace': 'error',
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/no-identical-title': 'error',
+      'jest/prefer-to-have-length': 'warn',
+      'jest/valid-expect': 'error',
+      'jest/prefer-expect-assertions': 'off',
     },
     settings: {
       'import/resolver': {
