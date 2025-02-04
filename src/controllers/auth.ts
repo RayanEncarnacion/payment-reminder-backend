@@ -1,10 +1,10 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { logEndpointError } from '@logger/index'
-import { JwtService, UserService } from '@services'
-import { APIResponse } from '@utils/classes'
-import { hashPassword } from '@utils/encryption'
-import { userRegistrationPayload } from '@validation/schemas'
+import { logEndpointError } from '@src/logger/index'
+import { JwtService, UserService } from '@src/services'
+import { APIResponse } from '@src/utils/classes'
+import { hashPassword } from '@src/utils/encryption'
+import { userRegistrationPayload } from '@src/validation/schemas'
 
 class AuthController {
   async signUp(req: Request, res: Response) {

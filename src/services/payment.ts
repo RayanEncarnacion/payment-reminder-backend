@@ -1,9 +1,9 @@
 import { eq, getTableColumns, sql } from 'drizzle-orm'
 import { StatusCodes } from 'http-status-codes'
-import { clientsTable, db, paymentsTable, projectsTable } from '@db'
-import { RedisService, BaseService } from '@services'
-import { PaymentData } from '@types'
-import { APIError } from '@utils/classes'
+import { clientsTable, db, paymentsTable, projectsTable } from '@src/db'
+import { RedisService, BaseService } from '@src/services'
+import { PaymentData } from '@src/types'
+import { APIError } from '@src/utils/classes'
 
 class PaymentService extends BaseService<typeof paymentsTable> {
   getWithDates = async (): Promise<PaymentData[]> => {
@@ -65,4 +65,4 @@ class PaymentService extends BaseService<typeof paymentsTable> {
   }
 }
 
-export default new PaymentService(paymentsTable, RedisService)
+export default new PaymentService(paymentsTable, 'payments', RedisService)

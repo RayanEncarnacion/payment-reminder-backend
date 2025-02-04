@@ -1,11 +1,11 @@
 import express from 'express'
-import { ProjectController } from '@controllers'
-import Middleware from '@middleware'
+import { ProjectController } from '@src/controllers'
+import Middleware from '@src/middleware'
 import {
   createProjectSchema,
   idParamSchema,
   updateProjectSchema,
-} from '@validation/schemas'
+} from '@src/validation/schemas'
 
 export default express
   .Router()

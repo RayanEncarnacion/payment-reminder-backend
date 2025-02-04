@@ -1,11 +1,11 @@
 import express from 'express'
-import { ClientController } from '@controllers'
-import Middleware from '@middleware'
+import { ClientController } from '@src/controllers'
+import Middleware from '@src/middleware'
 import {
   createClientSchema,
   idParamSchema,
   updateClientSchema,
-} from '@validation/schemas'
+} from '@src/validation/schemas'
 
 export default express
   .Router()

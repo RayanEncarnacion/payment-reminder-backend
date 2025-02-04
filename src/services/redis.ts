@@ -1,5 +1,5 @@
-import { redisClient } from '@db'
-import { type IRedisService } from '@services'
+import { redisClient } from '@src/db'
+import { type IRedisService } from '@src/services'
 
 class RedisService implements IRedisService {
   async get(key: string) {

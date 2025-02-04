@@ -1,7 +1,10 @@
 import express from 'express'
-import { AuthController } from '@controllers'
-import Middleware from '@middleware'
-import { userRegistrationSchema, userSignInSchema } from '@validation/schemas'
+import { AuthController } from '@src/controllers'
+import Middleware from '@src/middleware'
+import {
+  userRegistrationSchema,
+  userSignInSchema,
+} from '@src/validation/schemas'
 
 export default express
   .Router()

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
-import { db, usersTable } from '@db'
-import { RedisService, BaseService } from '@services'
-import { comparePassword } from '@utils/encryption'
+import { db, usersTable } from '@src/db'
+import { RedisService, BaseService } from '@src/services'
+import { comparePassword } from '@src/utils/encryption'
 
 class UserService extends BaseService<typeof usersTable> {
   async getByEmail(email: string) {
@@ -20,4 +20,4 @@ class UserService extends BaseService<typeof usersTable> {
   }
 }
 
-export default new UserService(usersTable, RedisService)
+export default new UserService(usersTable, 'users', RedisService)

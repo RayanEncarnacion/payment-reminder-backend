@@ -1,16 +1,16 @@
-import { eq, desc, and } from 'drizzle-orm'
-import { db, DBTables } from '@db'
-import { type IRedisService } from '@services'
+import { eq, desc, and, getTableName, Table } from 'drizzle-orm'
+import { db, DBTables } from '@src/db'
+import { type IRedisService } from '@src/services'
 
 class BaseService<T extends DBTables> {
-  table
+  table: DBTables
   redis: IRedisService
-  tableName
+  tableName: string
 
-  constructor(table: DBTables, redisService: IRedisService) {
+  constructor(table: DBTables, tableName: string, redisService: IRedisService) {
     this.table = table
     this.redis = redisService
-    this.tableName = (table as any)[Symbol.for('drizzle:Name')]
+    this.tableName = tableName
   }
 
   async existsById(id: number) {

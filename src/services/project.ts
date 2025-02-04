@@ -5,10 +5,11 @@ import {
   paymentsTable,
   projectDatesTable,
   projectsTable,
-} from '@db'
-import { BaseService, RedisService, MailService } from '@services'
-import { correctUTCDate } from '@utils'
-import { updateProjectPayload } from '@validation/schemas'
+} from '@src/db'
+import projects from '@src/routers/projects'
+import { BaseService, RedisService, MailService } from '@src/services'
+import { correctUTCDate } from '@src/utils'
+import { updateProjectPayload } from '@src/validation/schemas'
 
 class ProjectService extends BaseService<typeof projectsTable> {
   async getWithDates() {
@@ -180,4 +181,4 @@ function getDueDate(day: number) {
   return new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
 }
 
-export default new ProjectService(projectsTable, RedisService)
+export default new ProjectService(projectsTable, 'projects', RedisService)

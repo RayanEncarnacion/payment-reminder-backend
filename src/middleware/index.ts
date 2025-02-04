@@ -3,8 +3,8 @@ import { rateLimit } from 'express-rate-limit'
 import { StatusCodes } from 'http-status-codes'
 import { TokenExpiredError } from 'jsonwebtoken'
 import { z, ZodError, ZodIssue } from 'zod'
-import { JwtService } from '@services'
-import { APIResponse } from '@utils/classes'
+import { JwtService } from '@src/services'
+import { APIResponse } from '@src/utils/classes'
 
 class Middleware {
   validateParams(schema: z.ZodSchema<any>) {

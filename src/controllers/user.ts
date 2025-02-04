@@ -1,8 +1,8 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { logEndpointError } from '@logger/index'
-import { UserService } from '@services'
-import { APIResponse } from '@utils/classes'
+import { logEndpointError } from '@src/logger/index'
+import { UserService } from '@src/services'
+import { APIResponse } from '@src/utils/classes'
 
 class UserController {
   async getAll(req: Request, res: Response) {

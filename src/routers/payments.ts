@@ -1,7 +1,7 @@
 import express from 'express'
-import { PaymentController } from '@controllers'
-import Middleware from '@middleware'
-import { idParamSchema, updatePaymentSchema } from '@validation/schemas'
+import { PaymentController } from '@src/controllers'
+import Middleware from '@src/middleware'
+import { idParamSchema, updatePaymentSchema } from '@src/validation/schemas'
 
 export default express
   .Router()

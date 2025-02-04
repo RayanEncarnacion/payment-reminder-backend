@@ -1,6 +1,6 @@
 import { eq, and, or } from 'drizzle-orm'
-import { db, clientsTable, projectsTable } from '@db'
-import { BaseService, RedisService } from '@services'
+import { db, clientsTable, projectsTable } from '@src/db'
+import { BaseService, RedisService } from '@src/services'
 
 class ClientService extends BaseService<typeof clientsTable> {
   async getByEmail(email: string) {
@@ -40,4 +40,4 @@ class ClientService extends BaseService<typeof clientsTable> {
   }
 }
 
-export default new ClientService(clientsTable, RedisService)
+export default new ClientService(clientsTable, 'clients', RedisService)

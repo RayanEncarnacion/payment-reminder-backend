@@ -1,5 +1,5 @@
 import cron from 'node-cron'
-import { ProjectService } from '@services'
+import { ProjectService } from '@src/services'
 
 export async function dailyCheck() {
   cron.schedule('0 0 * * *', () => {

@@ -1,7 +1,7 @@
 import express from 'express'
-import { UserController } from '@controllers'
-import Middleware from '@middleware'
-import { idParamSchema } from '@validation/schemas'
+import { UserController } from '@src/controllers'
+import Middleware from '@src/middleware'
+import { idParamSchema } from '@src/validation/schemas'
 
 export default express
   .Router()

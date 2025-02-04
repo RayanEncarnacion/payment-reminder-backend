@@ -1,8 +1,8 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { logEndpointError } from '@logger/index'
-import { ClientService } from '@services'
-import { APIResponse } from '@utils/classes'
+import { logEndpointError } from '@src/logger/index'
+import { ClientService } from '@src/services'
+import { APIResponse } from '@src/utils/classes'
 
 class ClientController {
   async getAll(req: Request, res: Response) {

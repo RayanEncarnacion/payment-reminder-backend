@@ -1,9 +1,9 @@
 import { Response, Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { logEndpointError } from '@logger/index'
-import { ClientService, ProjectService } from '@services'
-import { APIResponse } from '@utils/classes'
-import { createProjectPayload } from '@validation/schemas'
+import { logEndpointError } from '@src/logger/index'
+import { ClientService, ProjectService } from '@src/services'
+import { APIResponse } from '@src/utils/classes'
+import { createProjectPayload } from '@src/validation/schemas'
 
 class ProjectController {
   async getAll(req: Request, res: Response) {
