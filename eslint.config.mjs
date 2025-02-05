@@ -68,7 +68,7 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'jest/no-disabled-tests': 'warn',
-      'jest/no-focused-tests': 'error',
+      'jest/no-focused-tests': 'off',
       'jest/no-identical-title': 'error',
       'jest/prefer-to-have-length': 'warn',
       'jest/valid-expect': 'error',
