@@ -1,23 +1,10 @@
 import { BaseService } from '@src/services'
-import { IRedisService } from '@src/services/types'
+import { getMockTable, mockRedisService } from '../mocks/RedisService'
 
 jest.mock('../../db/db')
 const { db } = require('../../db/db')
 
-const mockRedisService = {
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  updateListItem: jest.fn(),
-  removeListItem: jest.fn(),
-  addToList: jest.fn(),
-} as jest.Mocked<IRedisService>
-
-const mockTable = {
-  id: 'id',
-  deleted: 'deleted',
-  name: 'mockTable',
-} as any
+const mockTable = getMockTable('base')
 
 describe('BaseService', () => {
   let service: BaseService<typeof mockTable>
@@ -45,7 +32,7 @@ describe('BaseService', () => {
 
       expect(result).toEqual(newRow)
       expect(mockRedisService.addToList).toHaveBeenCalledWith(
-        'mockTable',
+        mockTable.name,
         newRow,
       )
     })
