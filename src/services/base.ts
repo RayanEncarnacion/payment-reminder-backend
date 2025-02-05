@@ -1,13 +1,14 @@
 import { eq, desc, and } from 'drizzle-orm'
-import { db, DBTables } from '@src/db'
+import { MySqlTableWithColumns } from 'drizzle-orm/mysql-core'
+import { db } from '@src/db'
 import { type IRedisService } from '@src/services'
 
-class BaseService<T extends DBTables> {
-  table: DBTables
+class BaseService<T extends MySqlTableWithColumns<any>> {
+  table: T
   redis: IRedisService
   tableName: string
 
-  constructor(table: DBTables, tableName: string, redisService: IRedisService) {
+  constructor(table: T, tableName: string, redisService: IRedisService) {
     this.table = table
     this.redis = redisService
     this.tableName = tableName
@@ -69,7 +70,7 @@ class BaseService<T extends DBTables> {
 
     if (!result.length) return
 
-    const insertedRow = await this.getById(result[0].id)
+    const insertedRow = await this.getById((result[0] as any).id)
     this.redis.addToList(this.tableName, insertedRow)
 
     return insertedRow
