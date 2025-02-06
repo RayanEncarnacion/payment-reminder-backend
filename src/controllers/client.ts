@@ -29,12 +29,12 @@ class ClientController {
     try {
       const name = req.body.name.trim()
       const email = req.body.email.trim()
-      const clientWithNameOrEmail = await ClientService.getByNameOrEmail(
+      const propsUsedByAnotherClient = await ClientService.getByNameOrEmail(
         name,
         email,
       )
 
-      if (clientWithNameOrEmail) {
+      if (propsUsedByAnotherClient) {
         res
           .status(StatusCodes.CONFLICT)
           .json(
