@@ -1,12 +1,12 @@
-import { eq } from 'drizzle-orm'
+import { eq, getTableName } from 'drizzle-orm'
 import { db, usersTable } from '@src/db'
 import { RedisService, BaseService } from '@src/services'
 import { comparePassword } from '@src/utils/encryption'
 
-class UserService extends BaseService<typeof usersTable> {
+export class UserService extends BaseService<typeof usersTable> {
   async getByEmail(email: string) {
     return (
-      await db.select().from(usersTable).where(eq(usersTable.email, email))
+      await db.select().from(this.table).where(eq(this.table.email, email))
     )[0]
   }
 
@@ -20,4 +20,8 @@ class UserService extends BaseService<typeof usersTable> {
   }
 }
 
-export default new UserService(usersTable, 'users', RedisService)
+export default new UserService(
+  usersTable,
+  getTableName(usersTable),
+  RedisService,
+)
