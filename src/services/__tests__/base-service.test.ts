@@ -52,7 +52,7 @@ describe('BaseService', () => {
     })
   })
 
-  describe.only('getById', () => {
+  describe('getById', () => {
     it('should return a row by ID', async () => {
       const mockRow = { id: 1, deleted: 0 }
       db.select.mockReturnValue({
