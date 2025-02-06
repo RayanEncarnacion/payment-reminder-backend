@@ -148,12 +148,12 @@ class ClientController {
 
   async getProjectsById(req: Request, res: Response) {
     try {
-      const projectsOfClient = await ClientService.getWithProjects(
+      const clientWithProjects = await ClientService.getWithProjects(
         parseInt(req.params.id, 10),
       )
       res
         .status(StatusCodes.OK)
-        .json(new APIResponse(StatusCodes.OK, projectsOfClient))
+        .json(new APIResponse(StatusCodes.OK, clientWithProjects))
     } catch (error: any) {
       logEndpointError(error?.message, req, { params: req.params })
 

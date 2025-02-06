@@ -53,10 +53,11 @@ export class ClientService extends BaseService<typeof clientsTable> {
   }
 
   async getWithProjects(id: number) {
-    return await db
-      .select({
-        ...(this.table as any),
-        projects: sql`
+    return (
+      await db
+        .select({
+          ...(this.table as any),
+          projects: sql`
                 CASE
                   WHEN COUNT(${this._projectsTable.id}) = 0 THEN NULL
                   ELSE JSON_ARRAYAGG(
@@ -69,19 +70,20 @@ export class ClientService extends BaseService<typeof clientsTable> {
                       )
                     )
                 END`,
-      })
-      .from(this.table)
-      .innerJoin(
-        this._projectsTable,
-        eq(this._projectsTable.clientId, this.table.id),
-      )
-      .where(
-        and(
-          eq(this.table.id, id),
-          eq(this.table.deleted, 0),
-          eq(this._projectsTable.deleted, 0),
-        ),
-      )
+        })
+        .from(this.table)
+        .innerJoin(
+          this._projectsTable,
+          eq(this._projectsTable.clientId, this.table.id),
+        )
+        .where(
+          and(
+            eq(this.table.id, id),
+            eq(this.table.deleted, 0),
+            eq(this._projectsTable.deleted, 0),
+          ),
+        )
+    )[0]
   }
 
   async getByNameOrEmail(name: string, email: string) {

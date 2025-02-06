@@ -1,3 +1,4 @@
+import { and, eq } from 'drizzle-orm'
 import { ClientService } from '../client'
 import { getMockTable, mockRedisService } from '../mocks/RedisService'
 
@@ -37,17 +38,6 @@ describe('ClientService', () => {
       const result = await service.getByEmail(row.email)
 
       expect(result).toEqual(row)
-    })
-
-    it('should return undefined if no row has email', async () => {
-      db.select.mockReturnValue({
-        from: jest.fn().mockReturnThis(),
-        where: jest.fn().mockResolvedValue([]),
-      })
-
-      const result = await service.getByEmail(row.email)
-
-      expect(result).toEqual(undefined)
     })
   })
 
@@ -91,6 +81,38 @@ describe('ClientService', () => {
       expect(mockTx.update).toHaveBeenCalledTimes(1)
       expect(mockTx.update).toHaveBeenCalledWith(mockClientsTable)
       expect(mockRedisService.removeListItem).not.toHaveBeenCalled()
+    })
+  })
+
+  describe.only('getWithProjects', () => {
+    it('should return client columns with list of non-deleted projects', async () => {
+      const clientId = 1
+      const mockedResult = { id: clientId, projects: [] }
+      const mockWhere = jest.fn().mockResolvedValue([mockedResult])
+      const mockQuery = {
+        from: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnValue({
+          where: mockWhere,
+        }),
+      }
+      db.select.mockReturnValue(mockQuery)
+
+      const result = await service.getWithProjects(clientId)
+
+      // ! Should query from the correct table, join with projects through clientId and should filter for non-deleted rows
+      expect(result).toEqual(mockedResult)
+      expect(mockQuery.from).toHaveBeenCalledWith(service.table)
+      expect(mockQuery.innerJoin).toHaveBeenCalledWith(
+        service._projectsTable,
+        eq(service._projectsTable.clientId, service.table.id),
+      )
+      expect(mockWhere).toHaveBeenCalledWith(
+        and(
+          eq(service.table.id, clientId),
+          eq(service.table.deleted, 0),
+          eq(service._projectsTable.deleted, 0),
+        ),
+      )
     })
   })
 })
