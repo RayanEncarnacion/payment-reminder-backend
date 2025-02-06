@@ -1,4 +1,4 @@
-import { eq, and, or } from 'drizzle-orm'
+import { eq, and, or, getTableName } from 'drizzle-orm'
 import { db, clientsTable, projectsTable } from '@src/db'
 import { BaseService, IRedisService, RedisService } from '@src/services'
 
@@ -31,19 +31,25 @@ export class ClientService extends BaseService<typeof clientsTable> {
   }
 
   async delete(id: number) {
-    await db.transaction(async (tx) => {
-      await tx
+    const deleted = await db.transaction(async (tx) => {
+      const result = await tx
         .update(this.table)
         .set({ deleted: 1 })
         .where(eq(this.table.id, id))
+
+      if (!result.length) return
 
       await tx
         .update(this._projectsTable)
         .set({ deleted: 1 })
         .where(eq(this._projectsTable.clientId, id))
+
+      return true
     })
 
-    this.redis.removeListItem('clients', 'id', id)
+    if (!deleted) return
+    this.redis.removeListItem(this.tableName, 'id', id)
+    return deleted
   }
 
   async getWithProjects(id: number) {
@@ -68,7 +74,7 @@ export class ClientService extends BaseService<typeof clientsTable> {
 
 export default new ClientService(
   clientsTable,
-  'clients',
+  getTableName(clientsTable),
   projectsTable,
   RedisService,
 )

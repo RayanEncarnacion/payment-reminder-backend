@@ -49,6 +49,8 @@ class BaseService<T extends MySqlTableWithColumns<any>> {
 
     if (!result.length) return
     this.redis.removeListItem(this.tableName, 'id', id)
+
+    return true
   }
 
   async update(id: number, payload: any) {
