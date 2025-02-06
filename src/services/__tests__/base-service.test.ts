@@ -52,28 +52,47 @@ describe('BaseService', () => {
     })
   })
 
-  describe('getById', () => {
+  describe.only('getById', () => {
     it('should return a row by ID', async () => {
       const mockRow = { id: 1, deleted: 0 }
-      const mockQuery = { where: jest.fn().mockResolvedValue([mockRow]) }
+      db.select.mockReturnValue({
+        from: jest
+          .fn()
+          .mockReturnValue({ where: jest.fn().mockResolvedValue([mockRow]) }),
+      })
 
-      db.select.mockReturnValue({ from: jest.fn().mockReturnValue(mockQuery) })
       const result = await service.getById(1)
 
       expect(result).toEqual(mockRow)
+    })
+
+    it('should return undefined if no row exists with ID', async () => {
+      db.select.mockReturnValue({
+        from: jest
+          .fn()
+          .mockReturnValue({ where: jest.fn().mockResolvedValue([]) }),
+      })
+
+      const result = await service.getById(1)
+
+      expect(result).toEqual(undefined)
     })
   })
 
   describe('existsById', () => {
     it('should return true if row exists', async () => {
       jest.spyOn(service, 'getById').mockResolvedValue({ id: 1 })
+
       const result = await service.existsById(1)
+
       expect(result).toBe(true)
     })
 
     it('should return false if row does not exist', async () => {
       jest.spyOn(service, 'getById').mockResolvedValue(undefined)
+
       const result = await service.existsById(1)
+
       expect(result).toBe(false)
     })
   })
@@ -87,6 +106,7 @@ describe('BaseService', () => {
 
     it('should return cached data if present without fetching from database', async () => {
       mockRedisService.get.mockResolvedValue(JSON.stringify(mockData))
+
       const result = await service.getAll()
 
       expect(result).toEqual(mockData)
@@ -95,7 +115,6 @@ describe('BaseService', () => {
 
     it('should fetch from database and cache', async () => {
       mockRedisService.get.mockResolvedValue(null)
-
       const mockedWhere = jest.fn().mockReturnThis()
       const mockedOrderBy = jest.fn().mockResolvedValue(mockData)
       db.select.mockReturnValue({
@@ -104,6 +123,7 @@ describe('BaseService', () => {
           orderBy: mockedOrderBy,
         }),
       })
+
       const result = await service.getAll()
 
       expect(result).toEqual(mockData)
@@ -127,13 +147,14 @@ describe('BaseService', () => {
 
     it('should update Redis if row exists', async () => {
       jest.spyOn(service, 'getById').mockResolvedValue(updatedRow)
-
       db.update.mockReturnValue({
         set: jest.fn().mockReturnThis(),
         where: jest.fn().mockResolvedValue(undefined),
       })
 
-      await service.update(rowToUpdate.id, payload)
+      const result = await service.update(rowToUpdate.id, payload)
+
+      expect(result).toEqual(updatedRow)
       expect(mockRedisService.updateListItem).toHaveBeenCalledWith(
         mockTable.name,
         'id',
@@ -144,13 +165,14 @@ describe('BaseService', () => {
 
     it('should not update Redis if no rows were updated', async () => {
       jest.spyOn(service, 'getById').mockResolvedValue(undefined)
-
       db.update.mockReturnValue({
         set: jest.fn().mockReturnThis(),
         where: jest.fn().mockResolvedValue(undefined),
       })
 
-      await service.update(rowToUpdate.id, payload)
+      const result = await service.update(rowToUpdate.id, payload)
+
+      expect(result).toEqual(undefined)
       expect(mockRedisService.updateListItem).not.toHaveBeenCalled()
     })
   })
@@ -163,6 +185,7 @@ describe('BaseService', () => {
       })
 
       await service.delete(1)
+
       expect(mockRedisService.removeListItem).not.toHaveBeenCalled()
     })
 
@@ -173,6 +196,7 @@ describe('BaseService', () => {
       })
 
       await service.delete(1)
+
       expect(mockRedisService.removeListItem).toHaveBeenCalledWith(
         mockTable.name,
         'id',
