@@ -1,4 +1,4 @@
-import { eq, and, lt, sql } from 'drizzle-orm'
+import { eq, and, lt, sql, getTableName } from 'drizzle-orm'
 import {
   db,
   clientsTable,
@@ -6,33 +6,57 @@ import {
   projectDatesTable,
   projectsTable,
 } from '@src/db'
-import { BaseService, RedisService, MailService } from '@src/services'
+import {
+  BaseService,
+  RedisService,
+  MailService,
+  IRedisService,
+} from '@src/services'
 import { correctUTCDate } from '@src/utils'
 import { updateProjectPayload } from '@src/validation/schemas'
 
-class ProjectService extends BaseService<typeof projectsTable> {
+export class ProjectService extends BaseService<typeof projectsTable> {
+  table: typeof projectsTable
+  _projectDates: typeof projectDatesTable
+  redis: IRedisService
+  tableName: string
+
+  constructor(
+    table: typeof projectsTable,
+    tableName: string,
+    _projectDates: typeof projectDatesTable,
+    redisService: IRedisService,
+  ) {
+    super(table, tableName, redisService)
+    this.table = table
+    this.tableName = tableName
+    this._projectDates = _projectDates
+    this.redis = redisService
+  }
+
   async getWithDates() {
     return await db
       .select({
-        project: projectsTable,
+        ...(projectsTable as any),
         dates: sql`
           CASE
-            WHEN COUNT(${projectDatesTable.id}) = 0 THEN NULL
+            WHEN COUNT(${this._projectDates.id}) = 0 THEN NULL
             ELSE JSON_ARRAYAGG(
                 JSON_OBJECT(
-                  'id', ${projectDatesTable.id},
-                  'projectId', ${projectDatesTable.projectId},
-                  'day', ${projectDatesTable.day}
+                  'id', ${this._projectDates.id},
+                  'projectId', ${this._projectDates.projectId},
+                  'day', ${this._projectDates.day}
                 )
               )
           END`,
       })
-      .from(projectsTable)
+      .from(this.table)
       .leftJoin(
-        projectDatesTable,
-        eq(projectDatesTable.projectId, projectsTable.id),
+        this._projectDates,
+        eq(this._projectDates.projectId, this.table.id),
       )
-      .groupBy(projectsTable.id)
+      .where(and(eq(this.table.deleted, 0), eq(this._projectDates.deleted, 0)))
+      .groupBy(this.table.id)
       .execute()
   }
 
@@ -41,13 +65,13 @@ class ProjectService extends BaseService<typeof projectsTable> {
   ) {
     const projectId = await db.transaction(async (tx) => {
       const [{ id: projectId }] = await tx
-        .insert(projectsTable)
+        .insert(this.table)
         .values(project)
         .$returningId()
 
       project.dates.forEach(
         async (day) =>
-          await tx.insert(projectDatesTable).values({
+          await tx.insert(this._projectDates).values({
             projectId,
             day,
             createdBy: project.createdBy,
@@ -65,24 +89,24 @@ class ProjectService extends BaseService<typeof projectsTable> {
   async update(id: number, project: updateProjectPayload) {
     return await db.transaction(async (tx) => {
       await tx
-        .update(projectsTable)
+        .update(this.table)
         .set({
           active: project.active,
           amount: project.amount.toFixed(2),
           name: project.name,
         })
-        .where(and(eq(projectsTable.id, id), eq(projectsTable.deleted, 0)))
+        .where(and(eq(this.table.id, id), eq(this.table.deleted, 0)))
 
       await tx
-        .update(projectDatesTable)
+        .update(this._projectDates)
         .set({ deleted: 1 })
-        .where(eq(projectDatesTable.projectId, id))
+        .where(eq(this._projectDates.projectId, id))
 
       const projectRow = await super.getById(id)
 
       project.dates.forEach(
         async (day) =>
-          await tx.insert(projectDatesTable).values({
+          await tx.insert(this._projectDates).values({
             day,
             projectId: id,
             createdBy: projectRow.createdBy,
@@ -97,26 +121,26 @@ class ProjectService extends BaseService<typeof projectsTable> {
 
   async getByName(name: string) {
     return (
-      await db.select().from(projectsTable).where(eq(projectsTable.name, name))
+      await db.select().from(this.table).where(eq(this.table.name, name))
     )[0]
   }
 
   async generatePayments() {
     const projectsToGeneratePayment = await db
       .select({
-        id: projectsTable.id,
-        amount: projectsTable.amount,
-        day: projectDatesTable.day,
+        id: this.table.id,
+        amount: this.table.amount,
+        day: this._projectDates.day,
       })
-      .from(projectsTable)
+      .from(this.table)
       .innerJoin(
-        projectDatesTable,
-        eq(projectsTable.id, projectDatesTable.projectId),
+        this._projectDates,
+        eq(this.table.id, this._projectDates.projectId),
       )
       .where(
         and(
-          eq(projectDatesTable.day, new Date().getDate() + 5),
-          eq(projectsTable.deleted, 0),
+          eq(this._projectDates.day, new Date().getDate() + 5),
+          eq(this.table.deleted, 0),
         ),
       )
 
@@ -151,18 +175,18 @@ class ProjectService extends BaseService<typeof projectsTable> {
       .select({
         client: clientsTable.name,
         email: clientsTable.email,
-        project: projectsTable.name,
+        project: this.table.name,
         amount: paymentsTable.amount,
         dueDate: paymentsTable.dueDate,
       })
       .from(paymentsTable)
-      .innerJoin(projectsTable, eq(projectsTable.id, paymentsTable.projectId))
-      .innerJoin(clientsTable, eq(projectsTable.clientId, clientsTable.id))
+      .innerJoin(this.table, eq(this.table.id, paymentsTable.projectId))
+      .innerJoin(clientsTable, eq(this.table.clientId, clientsTable.id))
       .where(
         and(
           lt(paymentsTable.dueDate, new Date()),
           eq(paymentsTable.payed, 0),
-          eq(projectsTable.deleted, 0),
+          eq(this.table.deleted, 0),
         ),
       )
 
@@ -180,4 +204,9 @@ function getDueDate(day: number) {
   return new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
 }
 
-export default new ProjectService(projectsTable, 'projects', RedisService)
+export default new ProjectService(
+  projectsTable,
+  getTableName(projectsTable),
+  projectDatesTable,
+  RedisService,
+)
