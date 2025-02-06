@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 import { ClientService } from '../client'
-import { getMockTable, mockRedisService } from '../mocks/RedisService'
+import { getMockTable } from '../mocks'
+import { mockRedisService } from '../mocks/RedisService'
 
 jest.mock('../../db/db')
 const { db } = require('../../db/db')

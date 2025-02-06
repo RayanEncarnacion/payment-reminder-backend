@@ -8,11 +8,3 @@ export const mockRedisService = {
   removeListItem: jest.fn(),
   addToList: jest.fn(),
 } as jest.Mocked<IRedisService>
-
-export const getMockTable = (name: string = 'mock') =>
-  ({
-    id: 'id',
-    deleted: 'deleted',
-    email: 'email',
-    name,
-  }) as any
