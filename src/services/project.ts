@@ -6,7 +6,6 @@ import {
   projectDatesTable,
   projectsTable,
 } from '@src/db'
-import projects from '@src/routers/projects'
 import { BaseService, RedisService, MailService } from '@src/services'
 import { correctUTCDate } from '@src/utils'
 import { updateProjectPayload } from '@src/validation/schemas'

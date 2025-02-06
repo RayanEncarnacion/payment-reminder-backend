@@ -1,4 +1,4 @@
-import { eq, and, or, getTableName } from 'drizzle-orm'
+import { eq, and, or, getTableName, sql } from 'drizzle-orm'
 import { db, clientsTable, projectsTable } from '@src/db'
 import { BaseService, IRedisService, RedisService } from '@src/services'
 
@@ -54,11 +54,31 @@ export class ClientService extends BaseService<typeof clientsTable> {
 
   async getWithProjects(id: number) {
     return await db
-      .select()
-      .from(this._projectsTable)
+      .select({
+        ...(this.table as any),
+        projects: sql`
+                CASE
+                  WHEN COUNT(${this._projectsTable.id}) = 0 THEN NULL
+                  ELSE JSON_ARRAYAGG(
+                      JSON_OBJECT(
+                        'id', ${this._projectsTable.id},
+                        'name', ${this._projectsTable.name},
+                        'amount', ${this._projectsTable.amount},
+                        'active', ${this._projectsTable.active},
+                        'createdAt', ${this._projectsTable.createdAt}
+                      )
+                    )
+                END`,
+      })
+      .from(this.table)
+      .innerJoin(
+        this._projectsTable,
+        eq(this._projectsTable.clientId, this.table.id),
+      )
       .where(
         and(
-          eq(this._projectsTable.clientId, id),
+          eq(this.table.id, id),
+          eq(this.table.deleted, 0),
           eq(this._projectsTable.deleted, 0),
         ),
       )
