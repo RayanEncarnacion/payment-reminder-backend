@@ -13,7 +13,6 @@ describe('ClientService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    const mockProjectsTable = getMockTable('projects')
     service = new ClientService(
       mockClientsTable,
       mockClientsTable.name,
@@ -23,13 +22,8 @@ describe('ClientService', () => {
   })
 
   describe('getByEmail', () => {
-    let row: { id: number; name: string; email: string }
-
-    beforeAll(() => {
-      row = { id: 1, name: 'New', email: 'test@nomail.com' }
-    })
-
     it('should return a row by email', async () => {
+      const row = { id: 1, name: 'New', email: 'test@nomail.com' }
       db.select.mockReturnValue({
         from: jest.fn().mockReturnThis(),
         where: jest.fn().mockResolvedValue([row]),
